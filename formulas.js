@@ -20,9 +20,10 @@ export const FORMULA_CONFIG = {
         const raVal = parseFloat(data.rArm);
         const udRaw = parseFloat(data.uDepth) || 0;
         
-        // Dynamic lips for 3/4" front profile (default to 0.188 if not specified)
-        const lipL = itemMode === 'threeQuarterFront' ? (parseFloat(data.lipLeft) ?? 0.188) : 0;
-        const lipR = itemMode === 'threeQuarterFront' ? (parseFloat(data.lipRight) ?? 0.188) : 0;
+        // Dynamic lips for 3/4" front profiles
+        const hasLips = (itemMode === 'threeQuarterFront' || itemMode === 'threeQuarterFrontDowelInside');
+        const lipL = hasLips ? (parseFloat(data.lipLeft) ?? 0.188) : 0;
+        const lipR = hasLips ? (parseFloat(data.lipRight) ?? 0.188) : 0;
 
         const deduction = this.getDeduction(t);
         const gap = w - (laVal + raVal);
@@ -53,8 +54,6 @@ export const FORMULA_CONFIG = {
         } else if (itemMode === 'threeQuarterFront') {
             const frontT = 0.750;
             const frontDeduction = this.getDeduction(frontT); // 0.750
-            
-            // Front width expands to include the side ears/lips
             backWidth = w + lipL + lipR;
             
             // Processed side length matching engineered joint tolerances
@@ -62,6 +61,18 @@ export const FORMULA_CONFIG = {
             sideLen = d - ((frontDeduction / 2) + (deduction / 2) + 0.062);
             
             udDisplay = udRaw + frontT - frontDeduction;
+            dLA = laVal; 
+            dRA = raVal;
+            notchHorizontalWidth = gap + (2 * frontT);
+        } else if (itemMode === 'threeQuarterFrontDowelInside') {
+            const frontT = 0.750;
+            backWidth = w + lipL + lipR;
+            
+            // Reuses identical engineered joint side length deductions as the 3/4 DT profile
+            sideLen = d - ((frontT / 2) + (deduction / 2) + 0.062);
+            
+            // Corrected: Follows dovetail spec rules but bases front thickness calculation on 3/4"
+            udDisplay = udRaw + frontT - deduction;
             dLA = laVal; 
             dRA = raVal;
             notchHorizontalWidth = gap + (2 * frontT);
