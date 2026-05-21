@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBS Production Manager V12.2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; transition: all 0.3s ease; }
+        .mode-dowel { --brand-primary: #2563eb; --brand-dark: #1e293b; }
+        .mode-dovetail { --brand-primary: #d97706; --brand-dark: #451a03; }
+        .mode-hybrid { --brand-primary: #4f46e5; --brand-dark: #311042; }
+        .brand-shadow { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .input-group label { @apply block text-[10px] font-bold text-slate-500 uppercase mb-1 tracking-wider; }
+        .input-group input, .input-group select { @apply border border-slate-300 rounded p-2 w-full bg-yellow-50 focus:bg-white outline-none transition-all text-sm; }
+        .arm-container { display: flex; justify-content: space-between; width: 100%; gap: 4%; }
+        .arm-item { width: 48%; }
+        .arm-item input { width: 100% !important; min-width: 0 !important; }
+        #preview-svg { display: none; }
+        .is-live #preview-svg { display: block; }
+        .is-live #static-reference { display: none; }
+
+        @media print {
+            @page { size: landscape; margin: 10mm; }
+            .no-print { display: none !important; }
+            .print-area { display: block !important; width: 100%; }
+            #print-items { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+            .item-container { border: 3px solid #000; padding: 12px; height: 46vh; page-break-inside: avoid; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow: hidden; background: #fff; }
+            svg { width: 100% !important; height: 100% !important; max-height: none !important; margin: 0 !important; }
+            .print-header-single { 
+                width: 100%; border-bottom: 2px solid #000; padding: 6px 0; margin-bottom: 8px;
+                font-size: 13px; font-weight: 900; display: flex; align-items: center; justify-content: space-between;
+                background: #fff; text-transform: uppercase; white-space: nowrap;
+            }
+            .header-left { flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; min-width: 0; padding-right: 10px; }
+            .header-right { flex-shrink: 0; white-space: nowrap; }
+            .hybrid-spec-tag { font-size: 10px; font-weight: 800; color: #000; text-transform: uppercase; margin-top: -4px; margin-bottom: 4px; text-align: left; width: 100%; border-bottom: 1px dashed #000; padding-bottom: 2px; }
+        }
+    </style>
+</head>
+<body id="main-body" class="p-4 md:p-8 mode-dovetail">
+
+    <div class="max-w-7xl mx-auto no-print">
+        <div class="bg-white p-6 rounded-t-xl brand-shadow border-l-8 border-slate-900 flex justify-between items-center mb-6">
+            <div class="flex items-center gap-6">
+                <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
+                <div>
+                    <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
+                </div>
+            </div>
+            <div id="status-chip" class="px-4 py-2 bg-orange-50 border border-orange-200 text-orange-700 text-[10px] font-black uppercase rounded-lg tracking-widest">
+                Active: Dovetail
+            </div>
+        </div>
+
+        <div id="header-bar" class="bg-orange-950 p-4 text-white flex justify-between items-center rounded-b-xl shadow-lg mb-8 border-t border-orange-800">
+            <h1 id="header-title" class="text-sm font-bold tracking-widest uppercase opacity-75">Dovetail Mode</h1>
+            <div class="flex gap-4">
+                <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded text-xs font-bold uppercase tracking-widest shadow-lg">Print Queue</button>
+                <button onclick="clearQueue()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-xs font-bold uppercase tracking-widest shadow-lg">Clear All</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-3">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2">Construction Mode</h2>
+                    <div class="bg-slate-100 p-1 rounded-lg border grid grid-cols-4 gap-1 mb-6 shadow-inner">
+                        <button id="btn-dovetail" onclick="setMode('dovetail')" class="py-1.5 rounded-md text-[9px] font-black uppercase transition-all bg-orange-600 text-white shadow-sm">Dovetail</button>
+                        <button id="btn-dowel" onclick="setMode('dowel')" class="py-1.5 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700">Dowel</button>
+                        <button id="btn-hybrid" onclick="setMode('hybrid')" class="py-1.5 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700">Hybrid</button>
+                        <button id="btn-34front" onclick="setMode('threeQuarterFront')" class="py-1.5 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700">3/4" Front DT</button>
+                    </div>
+
+                    <div id="entry-form" class="flex flex-col gap-4">
+                        <div class="input-group"><label>Line Label (Max 10)</label><input type="text" id="label" placeholder="e.g. Unit 1" maxlength="10" oninput="validateInput()"></div>
+                        <div class="input-group"><label>Qty*</label><input type="number" id="qty" placeholder="1" oninput="validateInput()"></div>
+                        <div class="input-group"><label>Thickness</label>
+                            <select id="thick" onchange="validateInput()">
+                                <option value="0.500">1/2" (0.500)</option>
+                                <option value="0.625">5/8" (0.625)</option>
+                                <option value="0.472">12mm (0.472)</option>
+                                <option value="0.750">3/4" (0.750)</option>
+                            </select>
+                        </div>
+                        <div class="input-group"><label>Box Width (W)*</label><input type="text" id="width" placeholder="0.000" oninput="validateInput()"></div>
+                        <div class="input-group"><label>Box Depth (D)*</label><input type="text" id="depth" placeholder="0.000" oninput="validateInput()"></div>
+                        <div class="input-group"><label>Box Height (H)*</label><input type="text" id="height" placeholder="0.000" oninput="validateInput()"></div>
+                        <div class="border-t pt-4">
+                            <div class="input-group"><label>U-Shape Pocket Depth*</label><input type="text" id="uDepth" placeholder="0.000" oninput="validateInput()"></div>
+                            <div class="arm-container mt-4">
+                                <div class="arm-item input-group"><label>Left Arm*</label><input type="text" id="lArm" placeholder="0.000" oninput="validateInput()"></div>
+                                <div class="arm-item input-group"><label>Right Arm*</label><input type="text" id="rArm" placeholder="0.000" oninput="validateInput()"></div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 mt-4">
+                            <button id="add-btn" onclick="addToQueue()" class="w-full bg-slate-300 text-white font-bold py-4 rounded shadow uppercase tracking-widest text-xs cursor-not-allowed" disabled>Add to Queue</button>
+                            <button onclick="resetForm()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold py-2 rounded transition-all uppercase tracking-widest text-[10px]">Manual Clear Form</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-9 space-y-6">
+                <div id="preview-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 flex flex-col items-center">
+                    <h2 class="w-full text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2 text-left">Blueprint Preview</h2>
+                    <div id="display-frame" class="w-full h-[500px] bg-slate-50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-slate-200 relative overflow-hidden text-center">
+                        <div id="static-reference" class="flex flex-col items-center justify-center opacity-40 grayscale">
+                            <svg viewBox="0 0 500 400" width="300" height="240">
+                                <path d="M 100 100 L 200 100 L 200 150 L 300 150 L 300 100 L 400 100 L 400 300 L 100 300 Z" fill="#dec19e" stroke="#000" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <svg id="preview-svg" viewBox="0 0 500 400" class="w-full h-auto max-h-full"></svg>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h2 class="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2">Active Production Queue</h2>
+                    <div id="queue-list" class="space-y-2 text-sm"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="print-container" class="hidden print-area"><div id="print-items"></div></div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
