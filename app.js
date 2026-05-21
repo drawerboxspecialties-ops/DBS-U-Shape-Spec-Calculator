@@ -46,8 +46,11 @@ function fmt(num) {
 }
 
 function validateInput() {
-    const fields = ['qty', 'width', 'depth', 'height', 'uDepth', 'lArm', 'rArm'];
+    const fields = ['qty', 'width', 'depth', 'height', 'lArm', 'rArm'];
     
+    if (currentMode !== 'threeQuarterFrontDowelInside') {
+        fields.push('uDepth');
+    }
     if (currentMode === 'threeQuarterFront' || currentMode === 'threeQuarterFrontDowelInside') {
         fields.push('lipLeft', 'lipRight');
     }
@@ -113,6 +116,7 @@ function setMode(mode) {
     const title = document.getElementById('header-title');
     const chip = document.getElementById('status-chip');
     const lipContainer = document.getElementById('lip-fields-container');
+    const pocketInputContainer = document.getElementById('pocket-input-container');
     
     const btnDovetail = document.getElementById('btn-dovetail');
     const btnDowel = document.getElementById('btn-dowel');
@@ -132,6 +136,12 @@ function setMode(mode) {
         lipContainer.classList.remove('hidden');
     } else {
         lipContainer.classList.add('hidden');
+    }
+
+    if (mode === 'threeQuarterFrontDowelInside') {
+        pocketInputContainer.classList.add('hidden');
+    } else {
+        pocketInputContainer.classList.remove('hidden');
     }
 
     if (mode === 'dovetail') {
@@ -234,8 +244,10 @@ function generateSVG(data, svgId, showWood, itemMode) {
         <line x1="${x0+sLA+12}" y1="${y0}" x2="${x0+sLA+12}" y2="${y0+sUD}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
         <text x="${x0+sLA+22}" y="${y0+(sUD/2)}" text-anchor="start" font-size="22" font-weight="bold" fill="red">${fmt(udDisplay)}</text>
         
+        ${itemMode !== 'threeQuarterFrontDowelInside' ? `
         <line x1="${x0+sLA}" y1="${y0+sUD+10}" x2="${x0+dW-sRA}" y2="${y0+sUD+10}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
         <text x="${x0+sLA+((sLA?((dW-sLA-sRA)/2):0))}" y="${y0+sUD+40}" text-anchor="middle" font-weight="bold" fill="red" font-size="28">${fmt(notchHorizontalWidth)}</text>
+        ` : ''}
         
         <text x="${x0+dW}" y="${y0+dD-5}" text-anchor="end" font-size="14" font-weight="bold">T = ${fmt(t)}</text>
     `;
