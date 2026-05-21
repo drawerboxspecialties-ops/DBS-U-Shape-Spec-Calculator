@@ -47,7 +47,8 @@ function fmt(num) {
 
 function validateInput() {
     const fields = ['qty', 'width', 'depth', 'height', 'uDepth', 'lArm', 'rArm'];
-    if (currentMode === 'threeQuarterFront') {
+    
+    if (currentMode === 'threeQuarterFront' || currentMode === 'threeQuarterFrontDowelInside') {
         fields.push('lipLeft', 'lipRight');
     }
     
@@ -79,6 +80,7 @@ function validateInput() {
         if (currentMode === 'dowel') btnColor = 'bg-blue-600 hover:bg-blue-700';
         if (currentMode === 'hybrid') btnColor = 'bg-indigo-600 hover:bg-indigo-700';
         if (currentMode === 'threeQuarterFront') btnColor = 'bg-amber-700 hover:bg-amber-800';
+        if (currentMode === 'threeQuarterFrontDowelInside') btnColor = 'bg-rose-700 hover:bg-rose-800';
         
         addBtn.className = `w-full ${btnColor} text-white font-bold py-4 rounded shadow-lg transition-all uppercase tracking-widest text-xs cursor-pointer`;
         addBtn.disabled = false;
@@ -116,15 +118,17 @@ function setMode(mode) {
     const btnDowel = document.getElementById('btn-dowel');
     const btnHybrid = document.getElementById('btn-hybrid');
     const btn34Front = document.getElementById('btn-34front');
+    const btn34DowelIn = document.getElementById('btn-34dovelin');
     resetForm(); 
 
-    const baseClass = 'py-1.5 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700';
+    const baseClass = 'py-1.5 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center';
     btnDovetail.className = baseClass;
     btnDowel.className = baseClass;
     btnHybrid.className = baseClass;
     btn34Front.className = baseClass;
+    btn34DowelIn.className = baseClass;
 
-    if (mode === 'threeQuarterFront') {
+    if (mode === 'threeQuarterFront' || mode === 'threeQuarterFrontDowelInside') {
         lipContainer.classList.remove('hidden');
     } else {
         lipContainer.classList.add('hidden');
@@ -158,6 +162,13 @@ function setMode(mode) {
         chip.textContent = 'Active: 3/4" Frt DT';
         chip.className = 'px-4 py-2 bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-black uppercase rounded-lg tracking-widest';
         btn34Front.className = 'py-1.5 rounded-md text-[9px] font-black uppercase transition-all bg-amber-700 text-white shadow-sm';
+    } else if (mode === 'threeQuarterFrontDowelInside') {
+        body.className = 'p-4 md:p-8 mode-dowel';
+        header.className = 'bg-rose-950 p-4 text-white flex justify-between items-center rounded-b-xl shadow-lg border-t border-rose-800';
+        title.textContent = '3/4" Front / Dowel Inside Spec Mode';
+        chip.textContent = 'Active: 3/4" Frt DWL In';
+        chip.className = 'px-4 py-2 bg-rose-50 border border-rose-200 text-rose-800 text-[10px] font-black uppercase rounded-lg tracking-widest';
+        btn34DowelIn.className = 'py-1.5 rounded-md text-[9px] font-black uppercase transition-all bg-rose-700 text-white shadow-sm';
     }
     validateInput();
 }
@@ -194,6 +205,7 @@ function generateSVG(data, svgId, showWood, itemMode) {
     
     if (itemMode === 'dovetail' || itemMode === 'hybrid') { sideColor = '#4a044e'; backColor = '#c2410c'; }
     if (itemMode === 'threeQuarterFront') { sideColor = '#78350f'; backColor = '#b45309'; }
+    if (itemMode === 'threeQuarterFrontDowelInside') { sideColor = '#9f1239'; backColor = '#be123c'; }
 
     svg.innerHTML = `
         <defs>
@@ -285,11 +297,15 @@ function renderQueue() {
         if (item.mode === 'dowel') displayMode = 'DWL';
         if (item.mode === 'hybrid') displayMode = 'HYB';
         if (item.mode === 'threeQuarterFront') displayMode = '75F';
+        if (item.mode === 'threeQuarterFrontDowelInside') displayMode = '75DI';
         
         let specialInstructionTag = '';
         if (item.mode === 'hybrid') specialInstructionTag = `<div class="hybrid-spec-tag">Front: Dovetail | Back: Dowel</div>`;
         if (item.mode === 'threeQuarterFront') {
             specialInstructionTag = `<div class="hybrid-spec-tag bg-amber-100 text-amber-950 px-1 py-0.5 rounded font-black text-center border border-amber-300">⚠️ PRODUCTION NOTE: 3/4" FRONT ONLY SPEC (L-Lip: ${fmt(item.lipLeft)} | R-Lip: ${fmt(item.lipRight)})</div>`;
+        }
+        if (item.mode === 'threeQuarterFrontDowelInside') {
+            specialInstructionTag = `<div class="hybrid-spec-tag bg-rose-100 text-rose-950 px-1 py-0.5 rounded font-black text-center border border-rose-300">⚠️ PRODUCTION NOTE: 3/4" FRONT / DOWEL TO INSIDE FACE (L-Lip: ${fmt(item.lipLeft)} | R-Lip: ${fmt(item.lipRight)})</div>`;
         }
         
         container.innerHTML = `
