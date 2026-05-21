@@ -1,4 +1,4 @@
-﻿// app.js - DOM interaction and SVG rendering
+// app.js - DOM interaction and SVG rendering
 import { FORMULA_CONFIG } from './formulas.js';
 
 let queue = [];
@@ -47,17 +47,22 @@ function fmt(num) {
 
 function validateInput() {
     const fields = ['qty', 'width', 'depth', 'height', 'uDepth', 'lArm', 'rArm'];
+    if (currentMode === 'threeQuarterFront') {
+        fields.push('lipLeft', 'lipRight');
+    }
+    
     const frame = document.getElementById('display-frame');
     const addBtn = document.getElementById('add-btn');
     let isComplete = true;
     
     fields.forEach(id => {
-        const rawVal = document.getElementById(id).value;
-        if (rawVal.trim() === "") {
+        const el = document.getElementById(id);
+        if (!el || el.value.trim() === "") {
             isComplete = false;
         } else {
-            const parsed = (id === 'qty') ? parseFloat(rawVal) : parseFraction(rawVal);
-            if (parsed <= 0 || isNaN(parsed)) isComplete = false;
+            const parsed = (id === 'qty') ? parseFloat(el.value) : parseFraction(el.value);
+            if (parsed < 0 || isNaN(parsed)) isComplete = false;
+            if ((id !== 'lipLeft' && id !== 'lipRight') && parsed <= 0) isComplete = false;
         }
     });
 
@@ -86,9 +91,15 @@ function validateInput() {
 }
 
 function resetForm() {
-    const inputs = document.querySelectorAll('#entry-form input');
-    inputs.forEach(i => i.value = "");
+    const inputs = document.querySelectorAll('#entry-form input:not([readonly])');
+    inputs.forEach(i => {
+        if(i.id !== 'lipLeft' && i.id !== 'lipRight') {
+            i.value = "";
+        }
+    });
     document.getElementById('thick').selectedIndex = 0;
+    document.getElementById('lipLeft').value = "0.188";
+    document.getElementById('lipRight').value = "0.188";
     document.getElementById('display-frame').classList.remove('is-live');
     validateInput();
 }
@@ -99,6 +110,7 @@ function setMode(mode) {
     const header = document.getElementById('header-bar');
     const title = document.getElementById('header-title');
     const chip = document.getElementById('status-chip');
+    const lipContainer = document.getElementById('lip-fields-container');
     
     const btnDovetail = document.getElementById('btn-dovetail');
     const btnDowel = document.getElementById('btn-dowel');
@@ -111,6 +123,12 @@ function setMode(mode) {
     btnDowel.className = baseClass;
     btnHybrid.className = baseClass;
     btn34Front.className = baseClass;
+
+    if (mode === 'threeQuarterFront') {
+        lipContainer.classList.remove('hidden');
+    } else {
+        lipContainer.classList.add('hidden');
+    }
 
     if (mode === 'dovetail') {
         body.className = 'p-4 md:p-8 mode-dovetail';
@@ -221,7 +239,9 @@ function updatePreview() {
         height: parseFraction(document.getElementById('height').value),
         uDepth: parseFraction(document.getElementById('uDepth').value),
         lArm: parseFraction(document.getElementById('lArm').value),
-        rArm: parseFraction(document.getElementById('rArm').value)
+        rArm: parseFraction(document.getElementById('rArm').value),
+        lipLeft: parseFraction(document.getElementById('lipLeft').value),
+        lipRight: parseFraction(document.getElementById('lipRight').value)
     };
     generateSVG(data, 'preview-svg', true, currentMode);
 }
@@ -238,7 +258,9 @@ function addToQueue() {
         height: parseFraction(document.getElementById('height').value),
         uDepth: parseFraction(document.getElementById('uDepth').value),
         lArm: parseFraction(document.getElementById('lArm').value),
-        rArm: parseFraction(document.getElementById('rArm').value)
+        rArm: parseFraction(document.getElementById('rArm').value),
+        lipLeft: parseFraction(document.getElementById('lipLeft').value),
+        lipRight: parseFraction(document.getElementById('lipRight').value)
     };
     queue.push(item); 
     saveQueueToStorage();
@@ -266,7 +288,9 @@ function renderQueue() {
         
         let specialInstructionTag = '';
         if (item.mode === 'hybrid') specialInstructionTag = `<div class="hybrid-spec-tag">Front: Dovetail | Back: Dowel</div>`;
-        if (item.mode === 'threeQuarterFront') specialInstructionTag = `<div class="hybrid-spec-tag">Front: 3/4" Dovetail | Sides/Back: Spec thickness</div>`;
+        if (item.mode === 'threeQuarterFront') {
+            specialInstructionTag = `<div class="hybrid-spec-tag bg-amber-100 text-amber-950 px-1 py-0.5 rounded font-black text-center border border-amber-300">⚠️ PRODUCTION NOTE: 3/4" FRONT ONLY SPEC (L-Lip: ${fmt(item.lipLeft)} | R-Lip: ${fmt(item.lipRight)})</div>`;
+        }
         
         container.innerHTML = `
             <div class="print-header-single">
