@@ -1,4 +1,4 @@
-﻿// formulas.js - Isolated manufacturing logic
+// formulas.js - Isolated manufacturing logic
 export const FORMULA_CONFIG = {
     // Material thickness deductions matrix
     deductions: {
@@ -19,6 +19,10 @@ export const FORMULA_CONFIG = {
         const laVal = parseFloat(data.lArm);
         const raVal = parseFloat(data.rArm);
         const udRaw = parseFloat(data.uDepth) || 0;
+        
+        // Dynamic lips for 3/4" front profile (default to 0.188 if not specified)
+        const lipL = itemMode === 'threeQuarterFront' ? (parseFloat(data.lipLeft) ?? 0.188) : 0;
+        const lipR = itemMode === 'threeQuarterFront' ? (parseFloat(data.lipRight) ?? 0.188) : 0;
 
         const deduction = this.getDeduction(t);
         const gap = w - (laVal + raVal);
@@ -47,15 +51,16 @@ export const FORMULA_CONFIG = {
             notchHorizontalWidth = w - (dLA + dRA + (4 * t));
             udDisplay = udRaw + t;
         } else if (itemMode === 'threeQuarterFront') {
-            // 3/4" Front Only, rest matches Dovetail spec
             const frontT = 0.750;
-            const frontDeduction = this.getDeduction(frontT);
+            const frontDeduction = this.getDeduction(frontT); // 0.750
             
-            // Side length deduction combines half of the 3/4" front joint and half of the standard back joint
-            sideLen = d - ((frontDeduction / 2) + (deduction / 2));
-            backWidth = w;
+            // Front width expands to include the side ears/lips
+            backWidth = w + lipL + lipR;
             
-            // Pocket depth display compensates for the fixed 3/4" material thickness
+            // Processed side length matching engineered joint tolerances
+            // 12mm -> d - 0.596 | 1/2" -> d - 0.624 | 5/8" -> d - 0.749 | 3/4" -> d - 0.812
+            sideLen = d - ((frontDeduction / 2) + (deduction / 2) + 0.062);
+            
             udDisplay = udRaw + frontT - frontDeduction;
             dLA = laVal; 
             dRA = raVal;
