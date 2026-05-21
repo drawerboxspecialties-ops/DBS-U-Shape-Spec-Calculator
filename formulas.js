@@ -57,7 +57,6 @@ export const FORMULA_CONFIG = {
             backWidth = w + lipL + lipR;
             
             // Processed side length matching engineered joint tolerances
-            // 12mm -> d - 0.596 | 1/2" -> d - 0.624 | 5/8" -> d - 0.749 | 3/4" -> d - 0.812
             sideLen = d - ((frontDeduction / 2) + (deduction / 2) + 0.062);
             
             udDisplay = udRaw + frontT - frontDeduction;
