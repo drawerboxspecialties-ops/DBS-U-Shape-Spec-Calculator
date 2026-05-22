@@ -70,8 +70,9 @@ export const FORMULA_CONFIG = {
             // Reuses identical engineered joint side length deductions as the 3/4 DT profile
             sideLen = d - ((frontT / 2) + (deduction / 2) + 0.062);
             
-            // Corrected: Follows dovetail spec rules but bases front thickness calculation on 3/4"
-            udDisplay = udRaw + frontT - deduction;
+            // Auto-Calculated: Overall Depth - Front Thickness (0.750) - Half back joint deduction (0.159 for 12mm)
+            udDisplay = d - frontT - (deduction / 2);
+            
             dLA = laVal; 
             dRA = raVal;
             notchHorizontalWidth = gap + (2 * frontT);
