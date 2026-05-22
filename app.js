@@ -1,4 +1,4 @@
-// app.js - DOM interaction and SVG rendering
+// app.js - DOM interaction, math cross-checks, and SVG rendering
 import { FORMULA_CONFIG } from './formulas.js';
 
 let queue = [];
@@ -46,12 +46,23 @@ function fmt(num) {
 }
 
 function validateInput() {
+    const isAutoPocketChecked = document.getElementById('autoPocketToggle').checked;
+    const pocketInputContainer = document.getElementById('pocket-input-container');
+    
+    // Smoothly toggle pocket input layout block based on checkbox setting
+    if (isAutoPocketChecked) {
+        pocketInputContainer.classList.add('hidden');
+    } else {
+        pocketInputContainer.classList.remove('hidden');
+    }
+
     const fields = ['qty', 'width', 'depth', 'height', 'lArm', 'rArm'];
     
-    if (currentMode !== 'threeQuarterFrontDowelInside') {
+    // Manual pocket parameter bounds validation bypassed if toggle switch auto-pilot is active
+    if (!isAutoPocketChecked) {
         fields.push('uDepth');
     }
-    if (currentMode === 'threeQuarterFront' || currentMode === 'threeQuarterFrontDowelInside') {
+    if (currentMode === 'threeQuarterFront') {
         fields.push('lipLeft', 'lipRight');
     }
     
@@ -59,6 +70,7 @@ function validateInput() {
     const addBtn = document.getElementById('add-btn');
     let isComplete = true;
     
+    // Base Check: Field completeness and basic limits
     fields.forEach(id => {
         const el = document.getElementById(id);
         if (!el || el.value.trim() === "") {
@@ -70,11 +82,39 @@ function validateInput() {
         }
     });
 
+    // Advanced Logical Multi-Point Cross-Checks
     if (isComplete) {
         const boxW = parseFraction(document.getElementById('width').value) || 0;
+        const boxD = parseFraction(document.getElementById('depth').value) || 0;
         const leftA = parseFraction(document.getElementById('lArm').value) || 0;
         const rightA = parseFraction(document.getElementById('rArm').value) || 0;
-        if ((leftA + rightA) >= boxW) isComplete = false;
+        const t = parseFloat(document.getElementById('thick').value);
+        const deduction = FORMULA_CONFIG.getDeduction(t);
+
+        // Cross-Check 1: Left + Right arms cannot bridge out or swallow overall width
+        if ((leftA + rightA) >= (boxW - 1.000)) {
+            isComplete = false;
+        }
+
+        // Cross-Check 2: Arm width segments cannot stretch deeper than overall drawer depth
+        if (leftA >= boxD || rightA >= boxD) {
+            isComplete = false;
+        }
+
+        // Cross-Check 3: Pocket Depth Threshold Constraints
+        if (!isAutoPocketChecked) {
+            const uDepthVal = parseFraction(document.getElementById('uDepth').value) || 0;
+            // Manual value cannot pierce back wall or leave under 1" of rear structural clearance
+            if (uDepthVal >= (boxD - 1.000)) {
+                isComplete = false;
+            }
+        } else {
+            // Auto-pocket baseline calculations cannot process if box parameter depth is structurally shallow
+            if (currentMode === 'dovetail' && boxD <= (t + deduction)) isComplete = false;
+            if (currentMode === 'dowel' && boxD <= (2 * t)) isComplete = false;
+            if (currentMode === 'hybrid' && boxD <= (t + (deduction / 2))) isComplete = false;
+            if (currentMode === 'threeQuarterFront' && boxD <= (0.750 + (deduction / 2))) isComplete = false;
+        }
     }
 
     if (isComplete) {
@@ -83,14 +123,13 @@ function validateInput() {
         if (currentMode === 'dowel') btnColor = 'bg-blue-600 hover:bg-blue-500';
         if (currentMode === 'hybrid') btnColor = 'bg-indigo-600 hover:bg-indigo-500';
         if (currentMode === 'threeQuarterFront') btnColor = 'bg-amber-700 hover:bg-amber-600';
-        if (currentMode === 'threeQuarterFrontDowelInside') btnColor = 'bg-rose-700 hover:bg-rose-600';
         
         addBtn.className = `w-full ${btnColor} text-white font-extrabold py-4 rounded-xl shadow-md transition-all uppercase tracking-widest text-xs cursor-pointer active:scale-[0.99]`;
         addBtn.disabled = false;
         updatePreview();
     } else {
         frame.classList.remove('is-live');
-        addBtn.className = "w-full bg-slate-100 text-slate-300 font-extrabold py-4 rounded-xl uppercase tracking-widest text-xs cursor-not-allowed border border-slate-200/40";
+        addBtn.className = "w-full bg-slate-100 text-slate-300 font-extrabold py-4 rounded-xl uppercase tracking-widest text-xs cursor-not-allowed border border-slate-200/40 shadow-none";
         addBtn.disabled = true;
     }
 }
@@ -116,32 +155,24 @@ function setMode(mode) {
     const title = document.getElementById('header-title');
     const chip = document.getElementById('status-chip');
     const lipContainer = document.getElementById('lip-fields-container');
-    const pocketInputContainer = document.getElementById('pocket-input-container');
+    const autoPocketCheckbox = document.getElementById('autoPocketToggle');
     
+    resetForm(); 
+    autoPocketCheckbox.checked = false; // Fresh reset for toggle states when altering layouts
+
+    const inactiveClass = 'py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 hover:bg-white/50 text-center';
     const btnDovetail = document.getElementById('btn-dovetail');
     const btnDowel = document.getElementById('btn-dowel');
     const btnHybrid = document.getElementById('btn-hybrid');
     const btn34Front = document.getElementById('btn-34front');
-    const btn34DowelIn = document.getElementById('btn-34dovelin');
-    resetForm(); 
+    
+    btnDovetail.className = inactiveClass; btnDowel.className = inactiveClass; 
+    btnHybrid.className = inactiveClass; btn34Front.className = inactiveClass;
 
-    const inactiveClass = 'py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 hover:bg-white/50 text-center';
-    btnDovetail.className = inactiveClass;
-    btnDowel.className = inactiveClass;
-    btnHybrid.className = inactiveClass;
-    btn34Front.className = inactiveClass;
-    btn34DowelIn.className = inactiveClass;
-
-    if (mode === 'threeQuarterFront' || mode === 'threeQuarterFrontDowelInside') {
+    if (mode === 'threeQuarterFront') {
         lipContainer.classList.remove('hidden');
     } else {
         lipContainer.classList.add('hidden');
-    }
-
-    if (mode === 'threeQuarterFrontDowelInside') {
-        pocketInputContainer.classList.add('hidden');
-    } else {
-        pocketInputContainer.classList.remove('hidden');
     }
 
     const activeClass = 'py-2 rounded-md text-[9px] font-black uppercase transition-all text-white shadow-sm text-center ';
@@ -174,13 +205,6 @@ function setMode(mode) {
         chip.textContent = 'Active: 3/4" Frt DT';
         chip.className = 'px-3.5 py-1.5 bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold uppercase rounded-full tracking-widest';
         btn34Front.className = activeClass + 'bg-amber-700';
-    } else if (mode === 'threeQuarterFrontDowelInside') {
-        body.className = 'p-4 lg:p-8 mode-dowel';
-        header.className = 'bg-rose-950 p-4 text-white flex justify-between items-center rounded-2xl shadow-md border-t-2 border-rose-600';
-        title.textContent = '3/4" Front / Dowel Inside Spec Mode';
-        chip.textContent = 'Active: 3/4" Frt DWL In';
-        chip.className = 'px-3.5 py-1.5 bg-rose-50 border border-rose-200 text-rose-800 text-[10px] font-bold uppercase rounded-full tracking-widest';
-        btn34DowelIn.className = activeClass + 'bg-rose-700';
     }
     validateInput();
 }
@@ -189,35 +213,27 @@ function generateSVG(data, svgId, showWood, itemMode) {
     const svg = document.getElementById(svgId);
     if (!svg) return;
     
-    const w = parseFloat(data.width); 
-    const d = parseFloat(data.depth); 
-    const h = parseFloat(data.height);
-    const t = parseFloat(data.t);
+    const w = parseFloat(data.width); const d = parseFloat(data.depth); 
+    const h = parseFloat(data.height); const t = parseFloat(data.t);
 
     const calcs = FORMULA_CONFIG.calculateValues(itemMode, data);
     const { sideLen, backWidth, udDisplay, dLA, dRA, notchHorizontalWidth } = calcs;
 
     const isPrint = svgId.includes('svg-p');
-    const hMargin = isPrint ? 60 : 85; 
-    const vTopMargin = isPrint ? 80 : 105; 
-    const vBottomMargin = isPrint ? 80 : 85;
+    const hMargin = isPrint ? 60 : 85; const vTopMargin = isPrint ? 80 : 105; const vBottomMargin = isPrint ? 80 : 85;
 
     const scale = Math.min((500 - hMargin * 2) / w, (400 - (vTopMargin + vBottomMargin) - 10) / d);
-    const dW = w * scale; const dD = d * scale; 
-    const sLA = dLA * scale; const sRA = dRA * scale;
-    const sUD = udDisplay * scale;
-    
-    const x0 = (500 - dW) / 2; 
-    const y0 = vTopMargin + (400 - (vTopMargin + vBottomMargin) - dD) / 2;
+    const dW = w * scale; const dD = d * scale; const sLA = dLA * scale; const sRA = dRA * scale; const sUD = udDisplay * scale;
+    const x0 = (500 - dW) / 2; const y0 = vTopMargin + (400 - (vTopMargin + vBottomMargin) - dD) / 2;
 
     const path = `M ${x0} ${y0} L ${x0+sLA} ${y0} L ${x0+sLA} ${y0+sUD} L ${x0+dW-sRA} ${y0+sUD} L ${x0+dW-sRA} ${y0} L ${x0+dW} ${y0} L ${x0+dW} ${y0+dD} L ${x0} ${y0+dD} Z`;
 
-    let sideColor = '#000';
-    let backColor = '#1e40af';
-    
+    let sideColor = '#000'; let backColor = '#1e40af';
     if (itemMode === 'dovetail' || itemMode === 'hybrid') { sideColor = '#4a044e'; backColor = '#c2410c'; }
     if (itemMode === 'threeQuarterFront') { sideColor = '#78350f'; backColor = '#b45309'; }
-    if (itemMode === 'threeQuarterFrontDowelInside') { sideColor = '#9f1239'; backColor = '#be123c'; }
+
+    // Hides internal width text guides if toggle option forces pocket flush to inner panel walls
+    const hideNotchLine = !!data.autoPocket;
 
     svg.innerHTML = `
         <defs>
@@ -246,7 +262,7 @@ function generateSVG(data, svgId, showWood, itemMode) {
         <line x1="${x0+sLA+12}" y1="${y0}" x2="${x0+sLA+12}" y2="${y0+sUD}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
         <text x="${x0+sLA+22}" y="${y0+(sUD/2)}" text-anchor="start" font-size="22" font-weight="bold" fill="red">${fmt(udDisplay)}</text>
         
-        ${itemMode !== 'threeQuarterFrontDowelInside' ? `
+        ${!hideNotchLine ? `
         <line x1="${x0+sLA}" y1="${y0+sUD+10}" x2="${x0+dW-sRA}" y2="${y0+sUD+10}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
         <text x="${x0+sLA+((sLA?((dW-sLA-sRA)/2):0))}" y="${y0+sUD+40}" text-anchor="middle" font-weight="bold" fill="red" font-size="28">${fmt(notchHorizontalWidth)}</text>
         ` : ''}
@@ -267,13 +283,15 @@ function updatePreview() {
         lArm: parseFraction(document.getElementById('lArm').value),
         rArm: parseFraction(document.getElementById('rArm').value),
         lipLeft: parseFraction(document.getElementById('lipLeft').value),
-        lipRight: parseFraction(document.getElementById('lipRight').value)
+        lipRight: parseFraction(document.getElementById('lipRight').value),
+        autoPocket: document.getElementById('autoPocketToggle').checked
     };
     generateSVG(data, 'preview-svg', true, currentMode);
 }
 
 function addToQueue() {
     const sel = document.getElementById('thick');
+    const isAutoChecked = document.getElementById('autoPocketToggle').checked;
     const item = {
         id: Date.now(), mode: currentMode,
         label: document.getElementById('label').value || 'Unit',
@@ -286,7 +304,8 @@ function addToQueue() {
         lArm: parseFraction(document.getElementById('lArm').value),
         rArm: parseFraction(document.getElementById('rArm').value),
         lipLeft: parseFraction(document.getElementById('lipLeft').value),
-        lipRight: parseFraction(document.getElementById('lipRight').value)
+        lipRight: parseFraction(document.getElementById('lipRight').value),
+        autoPocket: isAutoChecked
     };
     queue.push(item); 
     saveQueueToStorage();
@@ -304,7 +323,8 @@ function renderQueue() {
         
         let labelName = item.mode.toUpperCase();
         if (item.mode === 'hybrid') labelName = 'DT FRT / DWL BK';
-        if (item.mode === 'threeQuarterFrontDowelInside') labelName = '3/4" FRT / DWL POCKET';
+        if (item.autoPocket && item.mode === 'threeQuarterFront') labelName = '3/4" FRT / DWL INSIDE';
+        else if (item.autoPocket) labelName += ' (AUTO-FLUSH)';
         
         row.innerHTML = `<span class="text-slate-700"><b>${index+1}. ${item.label}</b> <span class="text-[10px] ml-1.5 px-2 py-0.5 rounded-md bg-slate-200/60 font-bold text-slate-500">${labelName}</span></span> <button onclick="removeItem(${item.id})" class="text-rose-600 font-bold uppercase text-[10px] hover:underline tracking-wider">Delete</button>`;
         list.appendChild(row);
@@ -312,20 +332,29 @@ function renderQueue() {
         const container = document.createElement('div');
         container.className = "item-container";
         
-        // Cleaned up long descriptors for landscape print cut sheets
         let displayMode = 'Dovetail';
         if (item.mode === 'dowel') displayMode = 'Dowel';
         if (item.mode === 'hybrid') displayMode = 'DT Front / DWL Back';
-        if (item.mode === 'threeQuarterFront') displayMode = '3/4" Front Dovetail';
-        if (item.mode === 'threeQuarterFrontDowelInside') displayMode = '3/4" Front and Dowel U-Depth Inside';
+        if (item.mode === 'threeQuarterFront') {
+            displayMode = item.autoPocket ? '3/4" Front and Dowel U-Depth Inside' : '3/4" Front Dovetail';
+        }
         
         let specialInstructionTag = '';
-        if (item.mode === 'hybrid') specialInstructionTag = `<div class="hybrid-spec-tag">Front: Dovetail | Back: Dowel</div>`;
+        if (item.mode === 'hybrid') specialInstructionTag = `<div class="hybrid-spec-tag">Front: Dovetail | Back: Dowel ${item.autoPocket ? '(Auto-Flush Pocket)' : ''}</div>`;
+        
         if (item.mode === 'threeQuarterFront') {
-            specialInstructionTag = `<div class="hybrid-spec-tag bg-amber-100 text-amber-950 px-1 py-0.5 rounded font-black text-center border border-amber-300">⚠️ PRODUCTION NOTE: 3/4" FRONT ONLY SPEC (L-Lip: ${fmt(item.lipLeft)} | R-Lip: ${fmt(item.lipRight)})</div>`;
+            if (item.autoPocket) {
+                specialInstructionTag = `<div class="hybrid-spec-tag bg-rose-100 text-rose-950 px-1 py-0.5 rounded font-black text-center border border-rose-300">⚠️ PRODUCTION NOTE: 3/4" FRONT / DOWEL TO INSIDE FACE (L-Lip: ${fmt(item.lipLeft)} | R-Lip: ${fmt(item.lipRight)})</div>`;
+            } else {
+                specialInstructionTag = `<div class="hybrid-spec-tag bg-amber-100 text-amber-950 px-1 py-0.5 rounded font-black text-center border border-amber-300">⚠️ PRODUCTION NOTE: 3/4" FRONT ONLY SPEC (L-Lip: ${fmt(item.lipLeft)} | R-Lip: ${fmt(item.lipRight)})</div>`;
+            }
         }
-        if (item.mode === 'threeQuarterFrontDowelInside') {
-            specialInstructionTag = `<div class="hybrid-spec-tag bg-rose-100 text-rose-950 px-1 py-0.5 rounded font-black text-center border border-rose-300">⚠️ PRODUCTION NOTE: 3/4" FRONT / DOWEL TO INSIDE FACE (L-Lip: ${fmt(item.lipLeft)} | R-Lip: ${fmt(item.lipRight)})</div>`;
+        
+        if (item.autoPocket && item.mode === 'dovetail') {
+            specialInstructionTag = `<div class="hybrid-spec-tag bg-blue-50 text-blue-950 px-1 py-0.5 rounded font-black text-center border border-blue-300">⚠️ PRODUCTION NOTE: FLUSH U-DEPTH POCKET DOVETAIL</div>`;
+        }
+        if (item.autoPocket && item.mode === 'dowel') {
+            specialInstructionTag = `<div class="hybrid-spec-tag bg-blue-50 text-blue-950 px-1 py-0.5 rounded font-black text-center border border-blue-300">⚠️ PRODUCTION NOTE: FLUSH U-DEPTH POCKET DOWEL</div>`;
         }
         
         container.innerHTML = `
