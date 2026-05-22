@@ -125,7 +125,6 @@ function setMode(mode) {
     const btn34DowelIn = document.getElementById('btn-34dovelin');
     resetForm(); 
 
-    // Balanced baseline interface configuration classes
     const inactiveClass = 'py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 hover:bg-white/50 text-center';
     btnDovetail.className = inactiveClass;
     btnDowel.className = inactiveClass;
@@ -305,6 +304,7 @@ function renderQueue() {
         
         let labelName = item.mode.toUpperCase();
         if (item.mode === 'hybrid') labelName = 'DT FRT / DWL BK';
+        if (item.mode === 'threeQuarterFrontDowelInside') labelName = '3/4" FRT / DWL POCKET';
         
         row.innerHTML = `<span class="text-slate-700"><b>${index+1}. ${item.label}</b> <span class="text-[10px] ml-1.5 px-2 py-0.5 rounded-md bg-slate-200/60 font-bold text-slate-500">${labelName}</span></span> <button onclick="removeItem(${item.id})" class="text-rose-600 font-bold uppercase text-[10px] hover:underline tracking-wider">Delete</button>`;
         list.appendChild(row);
@@ -312,11 +312,12 @@ function renderQueue() {
         const container = document.createElement('div');
         container.className = "item-container";
         
-        let displayMode = 'DT';
-        if (item.mode === 'dowel') displayMode = 'DWL';
-        if (item.mode === 'hybrid') displayMode = 'HYB';
-        if (item.mode === 'threeQuarterFront') displayMode = '75F';
-        if (item.mode === 'threeQuarterFrontDowelInside') displayMode = '75DI';
+        // Cleaned up long descriptors for landscape print cut sheets
+        let displayMode = 'Dovetail';
+        if (item.mode === 'dowel') displayMode = 'Dowel';
+        if (item.mode === 'hybrid') displayMode = 'DT Front / DWL Back';
+        if (item.mode === 'threeQuarterFront') displayMode = '3/4" Front Dovetail';
+        if (item.mode === 'threeQuarterFrontDowelInside') displayMode = '3/4" Front and Dowel U-Depth Inside';
         
         let specialInstructionTag = '';
         if (item.mode === 'hybrid') specialInstructionTag = `<div class="hybrid-spec-tag">Front: Dovetail | Back: Dowel</div>`;
