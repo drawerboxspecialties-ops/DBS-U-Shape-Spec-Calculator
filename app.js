@@ -79,18 +79,18 @@ function validateInput() {
 
     if (isComplete) {
         frame.classList.add('is-live');
-        let btnColor = 'bg-orange-600 hover:bg-orange-700';
-        if (currentMode === 'dowel') btnColor = 'bg-blue-600 hover:bg-blue-700';
-        if (currentMode === 'hybrid') btnColor = 'bg-indigo-600 hover:bg-indigo-700';
-        if (currentMode === 'threeQuarterFront') btnColor = 'bg-amber-700 hover:bg-amber-800';
-        if (currentMode === 'threeQuarterFrontDowelInside') btnColor = 'bg-rose-700 hover:bg-rose-800';
+        let btnColor = 'bg-orange-600 hover:bg-orange-500';
+        if (currentMode === 'dowel') btnColor = 'bg-blue-600 hover:bg-blue-500';
+        if (currentMode === 'hybrid') btnColor = 'bg-indigo-600 hover:bg-indigo-500';
+        if (currentMode === 'threeQuarterFront') btnColor = 'bg-amber-700 hover:bg-amber-600';
+        if (currentMode === 'threeQuarterFrontDowelInside') btnColor = 'bg-rose-700 hover:bg-rose-600';
         
-        addBtn.className = `w-full ${btnColor} text-white font-bold py-4 rounded shadow-lg transition-all uppercase tracking-widest text-xs cursor-pointer`;
+        addBtn.className = `w-full ${btnColor} text-white font-extrabold py-4 rounded-xl shadow-md transition-all uppercase tracking-widest text-xs cursor-pointer active:scale-[0.99]`;
         addBtn.disabled = false;
         updatePreview();
     } else {
         frame.classList.remove('is-live');
-        addBtn.className = "w-full bg-slate-300 text-white font-bold py-4 rounded shadow uppercase tracking-widest text-xs cursor-not-allowed";
+        addBtn.className = "w-full bg-slate-100 text-slate-300 font-extrabold py-4 rounded-xl uppercase tracking-widest text-xs cursor-not-allowed border border-slate-200/40";
         addBtn.disabled = true;
     }
 }
@@ -125,12 +125,13 @@ function setMode(mode) {
     const btn34DowelIn = document.getElementById('btn-34dovelin');
     resetForm(); 
 
-    const baseClass = 'py-1.5 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center';
-    btnDovetail.className = baseClass;
-    btnDowel.className = baseClass;
-    btnHybrid.className = baseClass;
-    btn34Front.className = baseClass;
-    btn34DowelIn.className = baseClass;
+    // Balanced baseline interface configuration classes
+    const inactiveClass = 'py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 hover:bg-white/50 text-center';
+    btnDovetail.className = inactiveClass;
+    btnDowel.className = inactiveClass;
+    btnHybrid.className = inactiveClass;
+    btn34Front.className = inactiveClass;
+    btn34DowelIn.className = inactiveClass;
 
     if (mode === 'threeQuarterFront' || mode === 'threeQuarterFrontDowelInside') {
         lipContainer.classList.remove('hidden');
@@ -144,41 +145,43 @@ function setMode(mode) {
         pocketInputContainer.classList.remove('hidden');
     }
 
+    const activeClass = 'py-2 rounded-md text-[9px] font-black uppercase transition-all text-white shadow-sm text-center ';
+
     if (mode === 'dovetail') {
-        body.className = 'p-4 md:p-8 mode-dovetail';
-        header.className = 'bg-orange-950 p-4 text-white flex justify-between items-center rounded-b-xl shadow-lg border-t border-orange-800';
+        body.className = 'p-4 lg:p-8 mode-dovetail';
+        header.className = 'bg-orange-950 p-4 text-white flex justify-between items-center rounded-2xl shadow-md border-t-2 border-orange-600';
         title.textContent = 'Dovetail Mode';
         chip.textContent = 'Active: Dovetail';
-        chip.className = 'px-4 py-2 bg-orange-50 border border-orange-200 text-orange-700 text-[10px] font-black uppercase rounded-lg tracking-widest';
-        btnDovetail.className = 'py-1.5 rounded-md text-[9px] font-black uppercase transition-all bg-orange-600 text-white shadow-sm';
+        chip.className = 'px-3.5 py-1.5 bg-orange-50 border border-orange-200 text-orange-700 text-[10px] font-bold uppercase rounded-full tracking-widest';
+        btnDovetail.className = activeClass + 'bg-orange-600';
     } else if (mode === 'dowel') {
-        body.className = 'p-4 md:p-8 mode-dowel';
-        header.className = 'bg-slate-800 p-4 text-white flex justify-between items-center rounded-b-xl shadow-lg border-t border-blue-800';
+        body.className = 'p-4 lg:p-8 mode-dowel';
+        header.className = 'bg-slate-900 p-4 text-white flex justify-between items-center rounded-2xl shadow-md border-t-2 border-blue-600';
         title.textContent = 'Dowel Mode';
         chip.textContent = 'Active: Dowel';
-        chip.className = 'px-4 py-2 bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-black uppercase rounded-lg tracking-widest';
-        btnDowel.className = 'py-1.5 rounded-md text-[9px] font-black uppercase transition-all bg-blue-600 text-white shadow-sm';
+        chip.className = 'px-3.5 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-bold uppercase rounded-full tracking-widest';
+        btnDowel.className = activeClass + 'bg-blue-600';
     } else if (mode === 'hybrid') {
-        body.className = 'p-4 md:p-8 mode-hybrid';
-        header.className = 'bg-indigo-950 p-4 text-white flex justify-between items-center rounded-b-xl shadow-lg border-t border-indigo-800';
-        title.textContent = 'Dovetail Front / Dowel Back Mode';
-        chip.textContent = 'Active: Hybrid';
-        chip.className = 'px-4 py-2 bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-black uppercase rounded-lg tracking-widest';
-        btnHybrid.className = 'py-1.5 rounded-md text-[9px] font-black uppercase transition-all bg-indigo-600 text-white shadow-sm';
+        body.className = 'p-4 lg:p-8 mode-hybrid';
+        header.className = 'bg-indigo-950 p-4 text-white flex justify-between items-center rounded-2xl shadow-md border-t-2 border-indigo-600';
+        title.textContent = 'DT Front / DWL Back Mode';
+        chip.textContent = 'Active: DT Frt / DWL Bk';
+        chip.className = 'px-3.5 py-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-bold uppercase rounded-full tracking-widest';
+        btnHybrid.className = activeClass + 'bg-indigo-600';
     } else if (mode === 'threeQuarterFront') {
-        body.className = 'p-4 md:p-8 mode-dovetail'; 
-        header.className = 'bg-amber-950 p-4 text-white flex justify-between items-center rounded-b-xl shadow-lg border-t border-amber-800';
+        body.className = 'p-4 lg:p-8 mode-dovetail'; 
+        header.className = 'bg-amber-950 p-4 text-white flex justify-between items-center rounded-2xl shadow-md border-t-2 border-amber-600';
         title.textContent = '3/4" Front Only / Dovetail Spec Mode';
         chip.textContent = 'Active: 3/4" Frt DT';
-        chip.className = 'px-4 py-2 bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-black uppercase rounded-lg tracking-widest';
-        btn34Front.className = 'py-1.5 rounded-md text-[9px] font-black uppercase transition-all bg-amber-700 text-white shadow-sm';
+        chip.className = 'px-3.5 py-1.5 bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold uppercase rounded-full tracking-widest';
+        btn34Front.className = activeClass + 'bg-amber-700';
     } else if (mode === 'threeQuarterFrontDowelInside') {
-        body.className = 'p-4 md:p-8 mode-dowel';
-        header.className = 'bg-rose-950 p-4 text-white flex justify-between items-center rounded-b-xl shadow-lg border-t border-rose-800';
+        body.className = 'p-4 lg:p-8 mode-dowel';
+        header.className = 'bg-rose-950 p-4 text-white flex justify-between items-center rounded-2xl shadow-md border-t-2 border-rose-600';
         title.textContent = '3/4" Front / Dowel Inside Spec Mode';
         chip.textContent = 'Active: 3/4" Frt DWL In';
-        chip.className = 'px-4 py-2 bg-rose-50 border border-rose-200 text-rose-800 text-[10px] font-black uppercase rounded-lg tracking-widest';
-        btn34DowelIn.className = 'py-1.5 rounded-md text-[9px] font-black uppercase transition-all bg-rose-700 text-white shadow-sm';
+        chip.className = 'px-3.5 py-1.5 bg-rose-50 border border-rose-200 text-rose-800 text-[10px] font-bold uppercase rounded-full tracking-widest';
+        btn34DowelIn.className = activeClass + 'bg-rose-700';
     }
     validateInput();
 }
@@ -298,8 +301,12 @@ function renderQueue() {
     list.innerHTML = ''; printList.innerHTML = '';
     queue.forEach((item, index) => {
         const row = document.createElement('div');
-        row.className = "flex justify-between items-center p-3 bg-slate-50 rounded border text-sm shadow-sm";
-        row.innerHTML = `<b>${index+1}. ${item.label} (${item.mode.toUpperCase()})</b> <button onclick="removeItem(${item.id})" class="text-red-600 font-bold uppercase text-[10px] hover:underline">Delete</button>`;
+        row.className = "flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-sm shadow-sm font-medium";
+        
+        let labelName = item.mode.toUpperCase();
+        if (item.mode === 'hybrid') labelName = 'DT FRT / DWL BK';
+        
+        row.innerHTML = `<span class="text-slate-700"><b>${index+1}. ${item.label}</b> <span class="text-[10px] ml-1.5 px-2 py-0.5 rounded-md bg-slate-200/60 font-bold text-slate-500">${labelName}</span></span> <button onclick="removeItem(${item.id})" class="text-rose-600 font-bold uppercase text-[10px] hover:underline tracking-wider">Delete</button>`;
         list.appendChild(row);
         
         const container = document.createElement('div');
