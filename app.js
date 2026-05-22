@@ -78,26 +78,31 @@ function validateInput() {
         }
     });
 
-    // High-Precision Structural Threshold Safeguards
     if (isComplete) {
-        const boxW = parseFraction(document.getElementById('width').value) || 0;
-        const boxD = parseFraction(document.getElementById('depth').value) || 0;
-        const leftA = parseFraction(document.getElementById('lArm').value) || 0;
-        const rightA = parseFraction(document.getElementById('rArm').value) || 0;
+        const boxW = parseFraction(document.getElementById('width').value);
+        const boxD = parseFraction(document.getElementById('depth').value);
+        const leftA = parseFraction(document.getElementById('lArm').value);
+        const rightA = parseFraction(document.getElementById('rArm').value);
         const t = parseFloat(document.getElementById('thick').value);
         const deduction = FORMULA_CONFIG.getDeduction(t);
 
-        if ((leftA + rightA) >= (boxW - 1.000)) isComplete = false;
-        if (leftA >= boxD || rightA >= boxD) isComplete = false;
-
-        if (!isAutoPocketChecked) {
-            const uDepthVal = parseFraction(document.getElementById('uDepth').value) || 0;
-            if (uDepthVal >= (boxD - 1.000)) isComplete = false;
+        if (isNaN(boxW) || isNaN(boxD) || isNaN(leftA) || isNaN(rightA) || isNaN(t)) {
+            isComplete = false;
         } else {
-            if (currentMode === 'dovetail' && boxD <= (t + deduction)) isComplete = false;
-            if (currentMode === 'dowel' && boxD <= (2 * t)) isComplete = false;
-            if (currentMode === 'hybrid' && boxD <= (t + (deduction / 2))) isComplete = false;
-            if (currentMode === 'threeQuarterFront' && boxD <= (0.750 + (deduction / 2))) isComplete = false;
+            // General Constraint: Left and right arms cannot collide or choke out total width
+            if ((leftA + rightA) >= (boxW - 1.000)) isComplete = false;
+            if (leftA >= boxD || rightA >= boxD) isComplete = false;
+
+            // Isolated Mode Track Safety Failsafes
+            if (!isAutoPocketChecked) {
+                const uDepthVal = parseFraction(document.getElementById('uDepth').value);
+                if (isNaN(uDepthVal) || uDepthVal >= (boxD - 1.000) || uDepthVal <= 0) isComplete = false;
+            } else {
+                if (currentMode === 'dovetail' && boxD <= (t + deduction)) isComplete = false;
+                if (currentMode === 'dowel' && boxD <= (2 * t)) isComplete = false;
+                if (currentMode === 'hybrid' && boxD <= (t + (deduction / 2))) isComplete = false;
+                if (currentMode === 'threeQuarterFront' && boxD <= (0.750 + (deduction / 2))) isComplete = false;
+            }
         }
     }
 
@@ -259,6 +264,7 @@ function generateSVG(data, svgId, showWood, itemMode, isPrint) {
 }
 
 function updatePreview() {
+    const isAutoChecked = document.getElementById('autoPocketToggle').checked;
     const data = {
         label: document.getElementById('label').value || "Unit",
         qty: parseFloat(document.getElementById('qty').value) || 0,
@@ -266,12 +272,12 @@ function updatePreview() {
         width: parseFraction(document.getElementById('width').value),
         depth: parseFraction(document.getElementById('depth').value),
         height: parseFraction(document.getElementById('height').value),
-        uDepth: parseFraction(document.getElementById('uDepth').value),
+        uDepth: isAutoChecked ? 0 : parseFraction(document.getElementById('uDepth').value),
         lArm: parseFraction(document.getElementById('lArm').value),
         rArm: parseFraction(document.getElementById('rArm').value),
         lipLeft: parseFraction(document.getElementById('lipLeft').value),
         lipRight: parseFraction(document.getElementById('lipRight').value),
-        autoPocket: document.getElementById('autoPocketToggle').checked
+        autoPocket: isAutoChecked
     };
     generateSVG(data, 'preview-svg', true, currentMode, false);
 }
@@ -279,8 +285,8 @@ function updatePreview() {
 function addToQueue() {
     const sel = document.getElementById('thick');
     const isAutoChecked = document.getElementById('autoPocketToggle').checked;
-    
     const uniqueHash = Math.random().toString(36).substr(2, 4);
+    
     const item = {
         id: Date.now() + '-' + uniqueHash, 
         mode: currentMode,
@@ -290,7 +296,7 @@ function addToQueue() {
         width: parseFraction(document.getElementById('width').value),
         depth: parseFraction(document.getElementById('depth').value),
         height: parseFraction(document.getElementById('height').value),
-        uDepth: parseFraction(document.getElementById('uDepth').value),
+        uDepth: isAutoChecked ? 0 : parseFraction(document.getElementById('uDepth').value),
         lArm: parseFraction(document.getElementById('lArm').value),
         rArm: parseFraction(document.getElementById('rArm').value),
         lipLeft: parseFraction(document.getElementById('lipLeft').value),
