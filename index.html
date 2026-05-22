@@ -66,15 +66,15 @@
             <div class="lg:col-span-3">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h2 class="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2">Construction Mode</h2>
-                    <div class="bg-slate-100 p-1 rounded-lg border flex flex-col gap-1.5 mb-6 shadow-inner">
-                        <div class="flex gap-1 w-full">
-                            <button id="btn-dovetail" onclick="setMode('dovetail')" class="flex-1 py-2 rounded-md text-[9px] font-black uppercase transition-all bg-orange-600 text-white shadow-sm">Dovetail</button>
-                            <button id="btn-dowel" onclick="setMode('dowel')" class="flex-1 py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700">Dowel</button>
-                            <button id="btn-hybrid" onclick="setMode('hybrid')" class="flex-1 py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700">Hybrid</button>
+                    <div class="bg-slate-100 p-1.5 rounded-lg border flex flex-col gap-y-1.5 mb-6 shadow-inner">
+                        <div class="grid grid-cols-3 gap-1 w-full">
+                            <button id="btn-dovetail" onclick="setMode('dovetail')" class="py-2 rounded-md text-[9px] font-black uppercase transition-all bg-orange-600 text-white shadow-sm text-center">Dovetail</button>
+                            <button id="btn-dowel" onclick="setMode('dowel')" class="py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center">Dowel</button>
+                            <button id="btn-hybrid" onclick="setMode('hybrid')" class="py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center">Hybrid</button>
                         </div>
-                        <div class="flex gap-1 w-full">
-                            <button id="btn-34front" onclick="setMode('threeQuarterFront')" class="flex-1 py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center justify-center">3/4" Frt DT</button>
-                            <button id="btn-34dovelin" onclick="setMode('threeQuarterFrontDowelInside')" class="flex-1 py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center justify-center">3/4" Frt DWL In</button>
+                        <div class="grid grid-cols-2 gap-1 w-full">
+                            <button id="btn-34front" onclick="setMode('threeQuarterFront')" class="py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center whitespace-nowrap">3/4" Frt DT</button>
+                            <button id="btn-34dovelin" onclick="setMode('threeQuarterFrontDowelInside')" class="py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center whitespace-nowrap">3/4" Frt DWL In</button>
                         </div>
                     </div>
 
