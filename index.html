@@ -87,9 +87,8 @@
                             <button id="btn-dowel" onclick="setMode('dowel')" class="py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center">Dowel</button>
                             <button id="btn-hybrid" onclick="setMode('hybrid')" class="py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center">DT Frt / DWL Bk</button>
                         </div>
-                        <div class="grid grid-cols-2 gap-1 w-full">
-                            <button id="btn-34front" onclick="setMode('threeQuarterFront')" class="py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center whitespace-nowrap">3/4" Frt DT</button>
-                            <button id="btn-34dovelin" onclick="setMode('threeQuarterFrontDowelInside')" class="py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center whitespace-nowrap">3/4" Frt DWL In</button>
+                        <div class="w-full">
+                            <button id="btn-34front" onclick="setMode('threeQuarterFront')" class="w-full py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center whitespace-nowrap">3/4" Front Only Spec</button>
                         </div>
                     </div>
                 </div>
@@ -117,7 +116,12 @@
                         </div>
 
                         <div class="border-t border-slate-100 pt-4 flex flex-col gap-4">
-                            <div id="pocket-input-container" class="input-group mb-4"><label>U-Shape Pocket Depth*</label><input type="text" id="uDepth" placeholder="0.000" oninput="validateInput()"></div>
+                            <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200/60 shadow-inner">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider pr-2">Auto-Flush Pocket to Inside Face</span>
+                                <input type="checkbox" id="autoPocketToggle" onchange="validateInput()" class="w-4 h-4 text-slate-900 border-slate-300 rounded focus:ring-slate-500 cursor-pointer">
+                            </div>
+
+                            <div id="pocket-input-container" class="input-group"><label>U-Shape Pocket Depth*</label><input type="text" id="uDepth" placeholder="0.000" oninput="validateInput()"></div>
                             <div class="arm-container">
                                 <div class="arm-item input-group"><label>Left Arm W*</label><input type="text" id="lArm" placeholder="0.000" oninput="validateInput()"></div>
                                 <div class="arm-item input-group"><label>Right Arm W*</label><input type="text" id="rArm" placeholder="0.000" oninput="validateInput()"></div>
