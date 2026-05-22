@@ -33,7 +33,7 @@ export const FORMULA_CONFIG = {
         if (itemMode === 'dovetail') {
             sideLen = d - deduction;
             backWidth = w;
-            // Toggle ON: Total Depth - Back Joint Deduction - Shop Offset (Hits exactly 14.313" on a 15" box)
+            // Toggle ON: Total Depth - Back Joint Deduction - Shop Face Shoulder Offset (Yields exactly 14.313" on a 15" box)
             // Toggle OFF: Restored old way manual spreadsheet calculation
             udDisplay = autoPocket ? (d - deduction - 0.313) : (udRaw + t - deduction);
             dLA = laVal; 
@@ -42,7 +42,7 @@ export const FORMULA_CONFIG = {
         } else if (itemMode === 'dowel') {
             sideLen = d;
             backWidth = w - (2 * t);
-            // Toggle ON: Total Depth - Front Material Thickness (e.g. 18 - 0.500 = 17.500")
+            // Toggle ON: Total Depth - Front Material Thickness (Yields exactly 17.528" on an 18" box for 12mm birch)
             // Toggle OFF: Restored old way manual spreadsheet calculation
             udDisplay = autoPocket ? (d - t) : (udRaw + t);
             dLA = laVal - (2 * t); 
@@ -54,9 +54,9 @@ export const FORMULA_CONFIG = {
             dLA = laVal - (2 * t); 
             dRA = raVal - (2 * t);
             notchHorizontalWidth = w - (dLA + dRA + (4 * t));
-            // Toggle ON: Shortened Side Blank - Front Material Thickness
+            // Toggle ON: Total Depth - Front Material Thickness (Yields exactly 14.500" on a 15" box)
             // Toggle OFF: Restored old way manual spreadsheet calculation
-            udDisplay = autoPocket ? (d - (deduction / 2) - t) : (udRaw + t);
+            udDisplay = autoPocket ? (d - t) : (udRaw + t);
         } else if (itemMode === 'threeQuarterFront') {
             const frontT = 0.750;
             const frontDeduction = this.getDeduction(frontT); // 0.750
