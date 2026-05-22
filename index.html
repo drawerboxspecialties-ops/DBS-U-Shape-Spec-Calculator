@@ -66,15 +66,15 @@
             <div class="lg:col-span-3">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h2 class="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2">Construction Mode</h2>
-                    <div class="bg-slate-100 p-1 rounded-lg border flex flex-col gap-1 mb-6 shadow-inner">
+                    <div class="bg-slate-100 p-1 rounded-lg border flex flex-col gap-1.5 mb-6 shadow-inner">
                         <div class="flex gap-1 w-full">
-                            <button id="btn-dovetail" onclick="setMode('dovetail')" class="flex-1 py-1.5 rounded-md text-[9px] font-black uppercase transition-all bg-orange-600 text-white shadow-sm">Dovetail</button>
-                            <button id="btn-dowel" onclick="setMode('dowel')" class="flex-1 py-1.5 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700">Dowel</button>
-                            <button id="btn-hybrid" onclick="setMode('hybrid')" class="flex-1 py-1.5 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700">Hybrid</button>
+                            <button id="btn-dovetail" onclick="setMode('dovetail')" class="flex-1 py-2 rounded-md text-[9px] font-black uppercase transition-all bg-orange-600 text-white shadow-sm">Dovetail</button>
+                            <button id="btn-dowel" onclick="setMode('dowel')" class="flex-1 py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700">Dowel</button>
+                            <button id="btn-hybrid" onclick="setMode('hybrid')" class="flex-1 py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700">Hybrid</button>
                         </div>
                         <div class="flex gap-1 w-full">
-                            <button id="btn-34front" onclick="setMode('threeQuarterFront')" class="flex-1 py-1.5 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center justify-center">3/4" Frt DT</button>
-                            <button id="btn-34dovelin" onclick="setMode('threeQuarterFrontDowelInside')" class="flex-1 py-1.5 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center justify-center">3/4" Frt DWL In</button>
+                            <button id="btn-34front" onclick="setMode('threeQuarterFront')" class="flex-1 py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center justify-center">3/4" Frt DT</button>
+                            <button id="btn-34dovelin" onclick="setMode('threeQuarterFrontDowelInside')" class="flex-1 py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 text-center justify-center">3/4" Frt DWL In</button>
                         </div>
                     </div>
 
@@ -114,11 +114,11 @@
             </div>
 
             <div class="lg:col-span-9 space-y-6">
-                <div id="preview-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 flex flex-col items-center">
-                    <h2 class="w-full text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2 text-left">Blueprint Preview</h2>
-                    <div id="display-frame" class="w-full h-[500px] bg-slate-50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-slate-200 relative overflow-hidden text-center">
+                <div id="preview-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col items-center">
+                    <h2 class="w-full text-[10px] font-black text-slate-400 uppercase mb-3 tracking-widest border-b pb-2 text-left">Blueprint Preview</h2>
+                    <div id="display-frame" class="w-full h-[400px] bg-slate-50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-slate-200 relative overflow-hidden text-center">
                         <div id="static-reference" class="flex flex-col items-center justify-center opacity-40 grayscale">
-                            <svg viewBox="0 0 500 400" width="300" height="240">
+                            <svg viewBox="0 0 500 400" width="260" height="208">
                                 <path d="M 100 100 L 200 100 L 200 150 L 300 150 L 300 100 L 400 100 L 400 300 L 100 300 Z" fill="#dec19e" stroke="#000" stroke-width="2" />
                             </svg>
                         </div>
