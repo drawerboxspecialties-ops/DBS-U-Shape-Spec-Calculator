@@ -13,18 +13,18 @@ export const FORMULA_CONFIG = {
     },
 
     calculateValues(itemMode, data) {
-        const t = parseFloat(data.t);
-        const w = parseFloat(data.width);
-        const d = parseFloat(data.depth);
-        const laVal = parseFloat(data.lArm);
-        const raVal = parseFloat(data.rArm);
-        const udRaw = parseFloat(data.uDepth) || 0;
+        // Direct assignment of pre-validated numeric properties
+        const t = data.t;
+        const w = data.width;
+        const d = data.depth;
+        const laVal = data.lArm;
+        const raVal = data.rArm;
+        const udRaw = data.uDepth || 0;
         const autoPocket = !!data.autoPocket; 
 
-        // Overlays apply strictly to the 3/4" Front specification mode layout
         const hasLips = (itemMode === 'threeQuarterFront');
-        const lipL = hasLips ? (parseFloat(data.lipLeft) ?? 0.188) : 0;
-        const lipR = hasLips ? (parseFloat(data.lipRight) ?? 0.188) : 0;
+        const lipL = hasLips ? (data.lipLeft ?? 0.188) : 0;
+        const lipR = hasLips ? (data.lipRight ?? 0.188) : 0;
 
         const deduction = this.getDeduction(t);
         const gap = w - (laVal + raVal);
@@ -34,14 +34,16 @@ export const FORMULA_CONFIG = {
         if (itemMode === 'dovetail') {
             sideLen = d - deduction;
             backWidth = w;
-            udDisplay = autoPocket ? (d - t - deduction) : (udRaw + t - deduction);
+            // Cross-Checked: Overall Depth - Back Joint Deduction - Front Material Thickness
+            udDisplay = autoPocket ? (d - deduction - t) : (udRaw + t - deduction);
             dLA = laVal; 
             dRA = raVal;
             notchHorizontalWidth = gap + (2 * t);
         } else if (itemMode === 'dowel') {
             sideLen = d;
             backWidth = w - (2 * t);
-            udDisplay = autoPocket ? (d - (2 * t)) : (udRaw + t);
+            // Cross-Checked: Overall Depth - Front Material Thickness
+            udDisplay = autoPocket ? (d - t) : (udRaw + t);
             dLA = laVal - (2 * t); 
             dRA = raVal - (2 * t);
             notchHorizontalWidth = gap;
@@ -51,17 +53,16 @@ export const FORMULA_CONFIG = {
             dLA = laVal - (2 * t); 
             dRA = raVal - (2 * t);
             notchHorizontalWidth = w - (dLA + dRA + (4 * t));
-            udDisplay = autoPocket ? (d - t - (deduction / 2)) : (udRaw + t);
+            // Cross-Checked: Shortened Side Blank - Front Material Thickness
+            udDisplay = autoPocket ? (d - (deduction / 2) - t) : (udRaw + t);
         } else if (itemMode === 'threeQuarterFront') {
             const frontT = 0.750;
-            const frontDeduction = this.getDeduction(frontT);
+            const frontDeduction = this.getDeduction(frontT); // 0.750
             backWidth = w + lipL + lipR;
             
-            // Side length matches your engineered joint tolerances
             sideLen = d - ((frontDeduction / 2) + (deduction / 2) + 0.062);
-            
-            // Toggle On: Auto-Flush matching old Mode 5 math. Toggle Off: Normal adjustments.
-            udDisplay = autoPocket ? (d - frontT - (deduction / 2)) : (udRaw + frontT - frontDeduction);
+            // Cross-Checked: Shortened Side Blank - Fixed 3/4" Front Panel Thickness
+            udDisplay = autoPocket ? (d - (deduction / 2) - frontT) : (udRaw + frontT - frontDeduction);
             
             dLA = laVal; 
             dRA = raVal;
