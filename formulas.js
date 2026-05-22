@@ -1,4 +1,4 @@
-// formulas.js - Isolated manufacturing logic
+// formulas.js - Isolated manufacturing logic engine
 export const FORMULA_CONFIG = {
     // Material thickness deductions matrix
     deductions: {
@@ -19,9 +19,10 @@ export const FORMULA_CONFIG = {
         const laVal = parseFloat(data.lArm);
         const raVal = parseFloat(data.rArm);
         const udRaw = parseFloat(data.uDepth) || 0;
-        
-        // Dynamic lips for 3/4" front profiles
-        const hasLips = (itemMode === 'threeQuarterFront' || itemMode === 'threeQuarterFrontDowelInside');
+        const autoPocket = !!data.autoPocket; 
+
+        // Overlays apply strictly to the 3/4" Front specification mode layout
+        const hasLips = (itemMode === 'threeQuarterFront');
         const lipL = hasLips ? (parseFloat(data.lipLeft) ?? 0.188) : 0;
         const lipR = hasLips ? (parseFloat(data.lipRight) ?? 0.188) : 0;
 
@@ -33,14 +34,14 @@ export const FORMULA_CONFIG = {
         if (itemMode === 'dovetail') {
             sideLen = d - deduction;
             backWidth = w;
-            udDisplay = udRaw + t - deduction;
+            udDisplay = autoPocket ? (d - t - deduction) : (udRaw + t - deduction);
             dLA = laVal; 
             dRA = raVal;
             notchHorizontalWidth = gap + (2 * t);
         } else if (itemMode === 'dowel') {
             sideLen = d;
             backWidth = w - (2 * t);
-            udDisplay = udRaw + t;
+            udDisplay = autoPocket ? (d - (2 * t)) : (udRaw + t);
             dLA = laVal - (2 * t); 
             dRA = raVal - (2 * t);
             notchHorizontalWidth = gap;
@@ -50,28 +51,18 @@ export const FORMULA_CONFIG = {
             dLA = laVal - (2 * t); 
             dRA = raVal - (2 * t);
             notchHorizontalWidth = w - (dLA + dRA + (4 * t));
-            udDisplay = udRaw + t;
+            udDisplay = autoPocket ? (d - t - (deduction / 2)) : (udRaw + t);
         } else if (itemMode === 'threeQuarterFront') {
             const frontT = 0.750;
-            const frontDeduction = this.getDeduction(frontT); // 0.750
+            const frontDeduction = this.getDeduction(frontT);
             backWidth = w + lipL + lipR;
             
-            // Processed side length matching engineered joint tolerances
+            // Side length matches your engineered joint tolerances
             sideLen = d - ((frontDeduction / 2) + (deduction / 2) + 0.062);
             
-            udDisplay = udRaw + frontT - frontDeduction;
-            dLA = laVal; 
-            dRA = raVal;
-            notchHorizontalWidth = gap + (2 * frontT);
-        } else if (itemMode === 'threeQuarterFrontDowelInside') {
-            const frontT = 0.750;
-            backWidth = w + lipL + lipR;
+            // Toggle On: Auto-Flush matching old Mode 5 math. Toggle Off: Normal adjustments.
+            udDisplay = autoPocket ? (d - frontT - (deduction / 2)) : (udRaw + frontT - frontDeduction);
             
-            // Reuses identical engineered joint side length deductions as the 3/4 DT profile
-            sideLen = d - ((frontT / 2) + (deduction / 2) + 0.062);
-            
-            // Auto-Calculated: Overall Depth - Front Thickness (0.750) - Half back joint deduction
-            udDisplay = d - frontT - (deduction / 2);
             dLA = laVal; 
             dRA = raVal;
             notchHorizontalWidth = gap + (2 * frontT);
