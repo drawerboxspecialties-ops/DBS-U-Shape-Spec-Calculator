@@ -12,9 +12,9 @@ try {
 }
 
 function parseFraction(val) {
-    if (val === undefined || val === null) return 0;
+    if (val === undefined || val === null) return NaN;
     let str = val.toString().trim();
-    if (!str) return 0;
+    if (!str) return NaN;
     if (/^\d+(\.\d+)?$/.test(str)) return parseFloat(str);
 
     str = str.replace(/-/g, ' ').replace(/\s+/g, ' ');
@@ -26,22 +26,21 @@ function parseFraction(val) {
         if (fracParts.length === 2) {
             const num = parseFloat(fracParts[0]);
             const den = parseFloat(fracParts[1]);
-            if (den !== 0) return whole + (num / den);
+            if (den !== 0 && !isNaN(whole) && !isNaN(num) && !isNaN(den)) return whole + (num / den);
         }
     } else if (parts.length === 1 && parts[0].includes('/')) {
         const fracParts = parts[0].split('/');
         if (fracParts.length === 2) {
             const num = parseFloat(fracParts[0]);
             const den = parseFloat(fracParts[1]);
-            if (den !== 0) return num / den;
+            if (den !== 0 && !isNaN(num) && !isNaN(den)) return num / den;
         }
     }
-    const fallback = parseFloat(str);
-    return isNaN(fallback) ? 0 : fallback;
+    return parseFloat(str);
 }
 
 function fmt(num) {
-    if (num === undefined || num === null || isNaN(num)) return "0";
+    if (num === undefined || num === null || isNaN(num)) return "ERROR";
     return parseFloat(parseFloat(num).toFixed(3)).toString();
 }
 
@@ -49,7 +48,6 @@ function validateInput() {
     const isAutoPocketChecked = document.getElementById('autoPocketToggle').checked;
     const pocketInputContainer = document.getElementById('pocket-input-container');
     
-    // Smoothly toggle pocket input layout block based on checkbox setting
     if (isAutoPocketChecked) {
         pocketInputContainer.classList.add('hidden');
     } else {
@@ -58,7 +56,6 @@ function validateInput() {
 
     const fields = ['qty', 'width', 'depth', 'height', 'lArm', 'rArm'];
     
-    // Manual pocket parameter bounds validation bypassed if toggle switch auto-pilot is active
     if (!isAutoPocketChecked) {
         fields.push('uDepth');
     }
@@ -70,19 +67,18 @@ function validateInput() {
     const addBtn = document.getElementById('add-btn');
     let isComplete = true;
     
-    // Base Check: Field completeness and basic limits
     fields.forEach(id => {
         const el = document.getElementById(id);
         if (!el || el.value.trim() === "") {
             isComplete = false;
         } else {
             const parsed = (id === 'qty') ? parseFloat(el.value) : parseFraction(el.value);
-            if (parsed < 0 || isNaN(parsed)) isComplete = false;
+            if (isNaN(parsed) || parsed < 0) isComplete = false;
             if ((id !== 'lipLeft' && id !== 'lipRight') && parsed <= 0) isComplete = false;
         }
     });
 
-    // Advanced Logical Multi-Point Cross-Checks
+    // High-Precision Structural Threshold Safeguards
     if (isComplete) {
         const boxW = parseFraction(document.getElementById('width').value) || 0;
         const boxD = parseFraction(document.getElementById('depth').value) || 0;
@@ -91,25 +87,13 @@ function validateInput() {
         const t = parseFloat(document.getElementById('thick').value);
         const deduction = FORMULA_CONFIG.getDeduction(t);
 
-        // Cross-Check 1: Left + Right arms cannot bridge out or swallow overall width
-        if ((leftA + rightA) >= (boxW - 1.000)) {
-            isComplete = false;
-        }
+        if ((leftA + rightA) >= (boxW - 1.000)) isComplete = false;
+        if (leftA >= boxD || rightA >= boxD) isComplete = false;
 
-        // Cross-Check 2: Arm width segments cannot stretch deeper than overall drawer depth
-        if (leftA >= boxD || rightA >= boxD) {
-            isComplete = false;
-        }
-
-        // Cross-Check 3: Pocket Depth Threshold Constraints
         if (!isAutoPocketChecked) {
             const uDepthVal = parseFraction(document.getElementById('uDepth').value) || 0;
-            // Manual value cannot pierce back wall or leave under 1" of rear structural clearance
-            if (uDepthVal >= (boxD - 1.000)) {
-                isComplete = false;
-            }
+            if (uDepthVal >= (boxD - 1.000)) isComplete = false;
         } else {
-            // Auto-pocket baseline calculations cannot process if box parameter depth is structurally shallow
             if (currentMode === 'dovetail' && boxD <= (t + deduction)) isComplete = false;
             if (currentMode === 'dowel' && boxD <= (2 * t)) isComplete = false;
             if (currentMode === 'hybrid' && boxD <= (t + (deduction / 2))) isComplete = false;
@@ -149,6 +133,11 @@ function resetForm() {
 }
 
 function setMode(mode) {
+    const filledInputs = Array.from(document.querySelectorAll('#entry-form input:not([readonly])')).some(i => i.value.trim() !== "" && i.id !== 'lipLeft' && i.id !== 'lipRight');
+    if (filledInputs && !confirm("Switch construction mode? This will discard your unsaved specifications.")) {
+        return;
+    }
+
     currentMode = mode;
     const body = document.getElementById('main-body');
     const header = document.getElementById('header-bar');
@@ -158,7 +147,7 @@ function setMode(mode) {
     const autoPocketCheckbox = document.getElementById('autoPocketToggle');
     
     resetForm(); 
-    autoPocketCheckbox.checked = false; // Fresh reset for toggle states when altering layouts
+    autoPocketCheckbox.checked = false; 
 
     const inactiveClass = 'py-2 rounded-md text-[9px] font-black uppercase transition-all text-slate-500 hover:text-slate-700 hover:bg-white/50 text-center';
     const btnDovetail = document.getElementById('btn-dovetail');
@@ -209,7 +198,7 @@ function setMode(mode) {
     validateInput();
 }
 
-function generateSVG(data, svgId, showWood, itemMode) {
+function generateSVG(data, svgId, showWood, itemMode, isPrint) {
     const svg = document.getElementById(svgId);
     if (!svg) return;
     
@@ -219,7 +208,6 @@ function generateSVG(data, svgId, showWood, itemMode) {
     const calcs = FORMULA_CONFIG.calculateValues(itemMode, data);
     const { sideLen, backWidth, udDisplay, dLA, dRA, notchHorizontalWidth } = calcs;
 
-    const isPrint = svgId.includes('svg-p');
     const hMargin = isPrint ? 60 : 85; const vTopMargin = isPrint ? 80 : 105; const vBottomMargin = isPrint ? 80 : 85;
 
     const scale = Math.min((500 - hMargin * 2) / w, (400 - (vTopMargin + vBottomMargin) - 10) / d);
@@ -232,7 +220,6 @@ function generateSVG(data, svgId, showWood, itemMode) {
     if (itemMode === 'dovetail' || itemMode === 'hybrid') { sideColor = '#4a044e'; backColor = '#c2410c'; }
     if (itemMode === 'threeQuarterFront') { sideColor = '#78350f'; backColor = '#b45309'; }
 
-    // Hides internal width text guides if toggle option forces pocket flush to inner panel walls
     const hideNotchLine = !!data.autoPocket;
 
     svg.innerHTML = `
@@ -286,14 +273,17 @@ function updatePreview() {
         lipRight: parseFraction(document.getElementById('lipRight').value),
         autoPocket: document.getElementById('autoPocketToggle').checked
     };
-    generateSVG(data, 'preview-svg', true, currentMode);
+    generateSVG(data, 'preview-svg', true, currentMode, false);
 }
 
 function addToQueue() {
     const sel = document.getElementById('thick');
     const isAutoChecked = document.getElementById('autoPocketToggle').checked;
+    
+    const uniqueHash = Math.random().toString(36).substr(2, 4);
     const item = {
-        id: Date.now(), mode: currentMode,
+        id: Date.now() + '-' + uniqueHash, 
+        mode: currentMode,
         label: document.getElementById('label').value || 'Unit',
         qty: parseFloat(document.getElementById('qty').value) || 1,
         t: parseFloat(sel.value), tName: sel.options[sel.selectedIndex].text,
@@ -326,7 +316,7 @@ function renderQueue() {
         if (item.autoPocket && item.mode === 'threeQuarterFront') labelName = '3/4" FRT / DWL INSIDE';
         else if (item.autoPocket) labelName += ' (AUTO-FLUSH)';
         
-        row.innerHTML = `<span class="text-slate-700"><b>${index+1}. ${item.label}</b> <span class="text-[10px] ml-1.5 px-2 py-0.5 rounded-md bg-slate-200/60 font-bold text-slate-500">${labelName}</span></span> <button onclick="removeItem(${item.id})" class="text-rose-600 font-bold uppercase text-[10px] hover:underline tracking-wider">Delete</button>`;
+        row.innerHTML = `<span class="text-slate-700"><b>${index+1}. ${item.label}</b> <span class="text-[10px] ml-1.5 px-2 py-0.5 rounded-md bg-slate-200/60 font-bold text-slate-500">${labelName}</span></span> <button onclick="removeItem('${item.id}')" class="text-rose-600 font-bold uppercase text-[10px] hover:underline tracking-wider">Delete</button>`;
         list.appendChild(row);
         
         const container = document.createElement('div');
@@ -365,7 +355,7 @@ function renderQueue() {
             ${specialInstructionTag}
             <svg id="svg-p-${item.id}" viewBox="0 0 500 400"></svg>`;
         printList.appendChild(container);
-        generateSVG(item, `svg-p-${item.id}`, false, item.mode);
+        generateSVG(item, `svg-p-${item.id}`, false, item.mode, true);
     });
 }
 
