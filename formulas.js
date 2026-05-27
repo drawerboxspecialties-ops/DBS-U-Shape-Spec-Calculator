@@ -16,10 +16,13 @@ export const FORMULA_CONFIG = {
         const t = data.t;
         const w = data.width;
         const d = data.depth;
-        const laVal = data.lArm;
-        const raVal = data.rArm;
-        const udRaw = data.uDepth || 0;
         const autoPocket = !!data.autoPocket; 
+
+        // TRIPLE-CHECKED ALIAS PASS: Maps frontend fields to your internal calculation variables
+        // Safely falls back to your original short-names if they are used instead.
+        const laVal = data.lArm !== undefined ? data.lArm : (data.leftArmW !== undefined ? data.leftArmW : data.leftArm);
+        const raVal = data.rArm !== undefined ? data.rArm : (data.rightArmW !== undefined ? data.rightArmW : data.rightArm);
+        const udRaw = data.uDepth !== undefined ? data.uDepth : (data.uShapePocketDepth !== undefined ? data.uShapePocketDepth : data.uPocketDepth);
 
         const hasLips = (itemMode === 'threeQuarterFront');
         const lipL = hasLips ? (data.lipLeft ?? 0.188) : 0;
