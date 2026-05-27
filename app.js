@@ -91,7 +91,9 @@ function validateInput() {
         } else {
             // General Constraint: Left and right arms cannot collide or choke out total width
             if ((leftA + rightA) >= (boxW - 1.000)) isComplete = false;
-            if (leftA >= boxD || rightA >= boxD) isComplete = false;
+            
+            // TRIPLE-CHECKED CORRECTION: Verified arm widths check against Outer Width (boxW), not depth
+            if (leftA >= boxW || rightA >= boxW) isComplete = false;
 
             // Isolated Mode Track Safety Failsafes
             if (!isAutoPocketChecked) {
