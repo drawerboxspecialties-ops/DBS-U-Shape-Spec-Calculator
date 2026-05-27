@@ -103,6 +103,25 @@ function validateInput() {
                 if (currentMode === 'hybrid' && boxD <= (t + (deduction / 2))) isComplete = false;
                 if (currentMode === 'threeQuarterFront' && boxD <= (0.750 + (deduction / 2))) isComplete = false;
             }
+
+            // Execute dry-run test using exactly packaged elements
+            if (isComplete) {
+                const testPayload = {
+                    t: t,
+                    width: boxW,
+                    depth: boxD,
+                    lArm: leftA,
+                    rArm: rightA,
+                    uDepth: isAutoPocketChecked ? 0 : parseFraction(document.getElementById('uDepth').value),
+                    lipLeft: parseFraction(document.getElementById('lipLeft').value || 0.188),
+                    lipRight: parseFraction(document.getElementById('lipRight').value || 0.188),
+                    autoPocket: isAutoPocketChecked
+                };
+                const mathResult = FORMULA_CONFIG.calculateValues(currentMode, testPayload);
+                if (isNaN(mathResult.sideLen) || isNaN(mathResult.backWidth) || isNaN(mathResult.udDisplay)) {
+                    isComplete = false;
+                }
+            }
         }
     }
 
@@ -306,6 +325,7 @@ function addToQueue() {
     queue.push(item); 
     saveQueueToStorage();
     renderQueue();
+    resetForm();
 }
 
 function renderQueue() {
@@ -322,7 +342,7 @@ function renderQueue() {
         if (item.autoPocket && item.mode === 'threeQuarterFront') labelName = '3/4" FRT / DWL INSIDE';
         else if (item.autoPocket) labelName += ' (AUTO-FLUSH)';
         
-        row.innerHTML = `<span class="text-slate-700"><b>${index+1}. ${item.label}</b> <span class="text-[10px] ml-1.5 px-2 py-0.5 rounded-md bg-slate-200/60 font-bold text-slate-500">${labelName}</span></span> <button onclick="removeItem('${item.id}')" class="text-rose-600 font-bold uppercase text-[10px] hover:underline tracking-wider">Delete</button>`;
+        row.innerHTML = `<span class="text-slate-700"><b>${index+1}. ${item.label}</b> <span class="text-[10px] ml-1.5 px-2 py-0.5 rounded-md bg-slate-200/60 font-bold text-slate-500">${labelName}</span></span> <button data-id="${item.id}" class="queue-del-btn text-rose-600 font-bold uppercase text-[10px] hover:underline tracking-wider">Delete</button>`;
         list.appendChild(row);
         
         const container = document.createElement('div');
@@ -362,6 +382,12 @@ function renderQueue() {
             <svg id="svg-p-${item.id}" viewBox="0 0 500 400"></svg>`;
         printList.appendChild(container);
         generateSVG(item, `svg-p-${item.id}`, false, item.mode, true);
+    });
+
+    list.querySelectorAll('.queue-del-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            removeItem(e.target.getAttribute('data-id'));
+        });
     });
 }
 
