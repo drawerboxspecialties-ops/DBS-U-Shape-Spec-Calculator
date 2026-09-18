@@ -5,6 +5,7 @@ const MODE_BUTTONS = {
     dovetail: { btn: 'btn-dovetail', color: 'bg-orange-600' },
     dowel: { btn: 'btn-dowel', color: 'bg-blue-600' },
     hybrid: { btn: 'btn-hybrid', color: 'bg-indigo-600' },
+    outerDtInnerDwl: { btn: 'btn-outer-dt-inner-dwl', color: 'bg-teal-700' },
     threeQuarterFront: { btn: 'btn-34front', color: 'bg-amber-700' }
 };
 
@@ -29,6 +30,13 @@ const MODE_THEMES = {
         title: 'DT Front / DWL Back Mode',
         chipText: 'Active: DT Frt / DWL Bk',
         chipClass: 'px-3.5 py-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-bold uppercase rounded-full tracking-widest'
+    },
+    outerDtInnerDwl: {
+        bodyClass: 'p-4 lg:p-8 mode-outerDtInnerDwl text-slate-800',
+        headerClass: 'bg-teal-950 px-5 sm:px-6 py-4 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 rounded-2xl commercial-shadow mb-6 border-t-2 border-teal-600 transition-all',
+        title: 'Outer DT / Inner DWL Mode',
+        chipText: 'Active: Outer DT / Inner DWL',
+        chipClass: 'px-3.5 py-1.5 bg-teal-50 border border-teal-200 text-teal-800 text-[10px] font-bold uppercase rounded-full tracking-widest'
     },
     threeQuarterFront: {
         bodyClass: 'p-4 lg:p-8 mode-threeQuarterFront text-slate-800',

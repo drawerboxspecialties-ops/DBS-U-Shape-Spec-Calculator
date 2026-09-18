@@ -82,6 +82,7 @@ export function setAddButtonEnabled(enabled, mode) {
         let btnColor = 'bg-orange-600 hover:bg-orange-500';
         if (mode === 'dowel') btnColor = 'bg-blue-600 hover:bg-blue-500';
         if (mode === 'hybrid') btnColor = 'bg-indigo-600 hover:bg-indigo-500';
+        if (mode === 'outerDtInnerDwl') btnColor = 'bg-teal-700 hover:bg-teal-600';
         if (mode === 'threeQuarterFront') btnColor = 'bg-amber-700 hover:bg-amber-600';
         addBtn.className = `w-full ${btnColor} text-white font-extrabold py-4 rounded-xl shadow-md transition-all uppercase tracking-widest text-xs cursor-pointer active:scale-[0.99]`;
         addBtn.disabled = false;

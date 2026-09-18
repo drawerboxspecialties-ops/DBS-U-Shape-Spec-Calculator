@@ -61,6 +61,14 @@ export const FORMULA_CONFIG = {
             // Toggle ON: Total Depth - Front Material Thickness (Yields exactly 14.500" on a 15" box)
             // Toggle OFF: Restored old way manual spreadsheet calculation
             udDisplay = autoPocket ? (d - t) : (udRaw + t);
+        } else if (itemMode === 'outerDtInnerDwl') {
+            // Outer corners dovetail · Inner cutout corners dowel (shop sketch: ○ DT / □ DWL)
+            sideLen = d - deduction;
+            backWidth = w;
+            dLA = laVal;
+            dRA = raVal;
+            notchHorizontalWidth = gap;
+            udDisplay = autoPocket ? (d - t) : (udRaw + t);
         } else if (itemMode === 'threeQuarterFront') {
             const frontT = 0.750;
             const frontDeduction = this.getDeduction(frontT); // 0.750

@@ -2,6 +2,7 @@ import { fmt, escapeHTML } from './utils.js';
 
 export function getModeLabel(mode, autoPocket) {
     if (mode === 'hybrid') return 'DT FRT / DWL BK';
+    if (mode === 'outerDtInnerDwl') return autoPocket ? 'OUTER DT / INNER DWL (AUTO-FLUSH)' : 'OUTER DT / INNER DWL';
     if (autoPocket && mode === 'threeQuarterFront') return '3/4" FRT / DWL INSIDE';
     if (mode === 'dovetail') return autoPocket ? 'DOVETAIL (AUTO-FLUSH)' : 'DOVETAIL';
     if (mode === 'dowel') return autoPocket ? 'DOWEL (AUTO-FLUSH)' : 'DOWEL';
@@ -12,6 +13,7 @@ export function getModeLabel(mode, autoPocket) {
 export function getPrintDisplayMode(item) {
     if (item.mode === 'dowel') return 'Dowel';
     if (item.mode === 'hybrid') return 'DT Front / DWL Back';
+    if (item.mode === 'outerDtInnerDwl') return 'Outer DT / Inner DWL';
     if (item.mode === 'threeQuarterFront') {
         return item.autoPocket ? '3/4" Front and Dowel U-Depth Inside' : '3/4" Front Dovetail';
     }
@@ -22,6 +24,10 @@ export function getPrintDisplayMode(item) {
 export function buildPrintInstructionTag(item) {
     if (item.mode === 'hybrid') {
         return `<div class="hybrid-spec-tag">Front: Dovetail | Back: Dowel ${item.autoPocket ? '(Auto-Flush Pocket)' : ''}</div>`;
+    }
+
+    if (item.mode === 'outerDtInnerDwl') {
+        return `<div class="hybrid-spec-tag bg-teal-50 text-teal-950 px-1 py-0.5 rounded font-black text-center border border-teal-300">⚠️ PRODUCTION NOTE: OUTER CORNERS DOVETAIL | CUTOUT CORNERS DOWEL ${item.autoPocket ? '(Auto-Flush Pocket)' : ''}</div>`;
     }
 
     if (item.mode === 'threeQuarterFront') {

@@ -79,3 +79,20 @@ test('3/4" front notch and U-pocket use sides/back thickness like dovetail', () 
     approx(r.udDisplay, 5.154, 'u-pocket depth');
     approx(r.backWidth, 20.376, 'back width with lips');
 });
+
+test('Outer DT / Inner DWL: outer blanks dovetail, cutout dowel-style', () => {
+    const r = FORMULA_CONFIG.calculateValues('outerDtInnerDwl', {
+        ...basePayload,
+        t: 0.472,
+        depth: 18,
+        lArm: 5,
+        rArm: 5,
+        uDepth: 5
+    });
+    approx(r.sideLen, 18 - 0.318, 'side length (dovetail outer)');
+    approx(r.backWidth, 20, 'back width (dovetail outer)');
+    approx(r.dLA, 5, 'left arm as entered');
+    approx(r.dRA, 5, 'right arm as entered');
+    approx(r.notchHorizontalWidth, 10, 'notch = gap (dowel cutout)');
+    approx(r.udDisplay, 5.472, 'u-pocket dowel-style');
+});

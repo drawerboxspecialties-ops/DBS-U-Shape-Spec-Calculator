@@ -36,6 +36,7 @@ export function getValidationIssue(payload, mode) {
         if (mode === 'dovetail' && boxD <= (t + deduction)) return 'Box depth is too shallow for auto-flush dovetail at this thickness.';
         if (mode === 'dowel' && boxD <= (2 * t)) return 'Box depth is too shallow for auto-flush dowel at this thickness.';
         if (mode === 'hybrid' && boxD <= (t + (deduction / 2))) return 'Box depth is too shallow for auto-flush hybrid at this thickness.';
+        if (mode === 'outerDtInnerDwl' && boxD <= (t + deduction)) return 'Box depth is too shallow for auto-flush Outer DT / Inner DWL at this thickness.';
         if (mode === 'threeQuarterFront' && boxD <= (0.750 + (deduction / 2))) return 'Box depth is too shallow for 3/4" front auto-flush at this thickness.';
     }
 

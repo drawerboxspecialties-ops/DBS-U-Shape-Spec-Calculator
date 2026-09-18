@@ -31,6 +31,7 @@ export function generateSVG(data, svgId, showWood, itemMode, isPrint) {
     let sideColor = '#000';
     let backColor = '#1e40af';
     if (itemMode === 'dovetail' || itemMode === 'hybrid') { sideColor = '#4a044e'; backColor = '#c2410c'; }
+    if (itemMode === 'outerDtInnerDwl') { sideColor = '#134e4a'; backColor = '#0f766e'; }
     if (itemMode === 'threeQuarterFront') { sideColor = '#78350f'; backColor = '#b45309'; }
 
     const hideNotchLine = !!data.autoPocket;
