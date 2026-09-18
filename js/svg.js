@@ -38,6 +38,15 @@ export function generateSVG(data, svgId, showWood, itemMode, isPrint) {
     const safeLabel = escapeHTML(data.label);
     const safeSvgId = escapeHTML(svgId);
 
+    const joineryTags = itemMode === 'outerDtInnerDwl' ? `
+        <text x="${x0 + sLA / 2}" y="${y0 - 52}" text-anchor="middle" font-size="14" font-weight="900" fill="#0f766e">DT</text>
+        <text x="${x0 + dW - sRA / 2}" y="${y0 - 52}" text-anchor="middle" font-size="14" font-weight="900" fill="#0f766e">DT</text>
+        <text x="${x0 + dW / 2}" y="${y0 + dD + 78}" text-anchor="middle" font-size="14" font-weight="900" fill="#0f766e">DT</text>
+        <text x="${x0 - 88}" y="${y0 + dD / 2}" text-anchor="middle" font-size="14" font-weight="900" fill="#0f766e" transform="rotate(-90, ${x0 - 88}, ${y0 + dD / 2})">DT</text>
+        <text x="${x0 + sLA + 22}" y="${y0 + (sUD / 2) + 22}" text-anchor="start" font-size="14" font-weight="900" fill="#b45309">DWL</text>
+        ${!hideNotchLine ? `<text x="${x0 + sLA + ((dW - sLA - sRA) / 2)}" y="${y0 + sUD + 58}" text-anchor="middle" font-size="14" font-weight="900" fill="#b45309">DWL</text>` : ''}
+    ` : '';
+
     svg.innerHTML = `
         <defs>
             <marker id="m-s-${safeSvgId}" markerWidth="10" markerHeight="10" refX="0" refY="5" orient="auto"><path d="M10,0 L0,5 L10,10 Z" fill="#000"/></marker>
@@ -71,5 +80,6 @@ export function generateSVG(data, svgId, showWood, itemMode, isPrint) {
         ` : ''}
         
         <text x="${x0+dW}" y="${y0+dD-5}" text-anchor="end" font-size="14" font-weight="bold">T = ${fmt(t)}</text>
+        ${joineryTags}
     `;
 }

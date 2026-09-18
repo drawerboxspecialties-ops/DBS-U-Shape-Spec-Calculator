@@ -12,17 +12,18 @@ export function setValidationMessage(message) {
     }
 }
 
-export function updateSpecReadout(payload, calcs) {
+export function updateSpecReadout(payload, calcs, mode = '') {
     const panel = document.getElementById('spec-readout');
     if (!panel) return;
 
+    const isOuterInner = mode === 'outerDtInnerDwl';
     const chips = [
-        { label: 'Side Length', value: fmt(calcs.sideLen), highlight: true },
-        { label: 'Back Width', value: fmt(calcs.backWidth), highlight: true },
-        { label: 'U-Pocket', value: fmt(calcs.udDisplay), highlight: true },
-        { label: 'Left Arm', value: fmt(calcs.dLA) },
-        { label: 'Right Arm', value: fmt(calcs.dRA) },
-        { label: 'Notch W', value: payload.autoPocket ? '—' : fmt(calcs.notchHorizontalWidth) }
+        { label: isOuterInner ? 'Side Length (DT)' : 'Side Length', value: fmt(calcs.sideLen), highlight: true },
+        { label: isOuterInner ? 'Back Width (DT)' : 'Back Width', value: fmt(calcs.backWidth), highlight: true },
+        { label: isOuterInner ? 'U-Pocket (DWL)' : 'U-Pocket', value: fmt(calcs.udDisplay), highlight: true },
+        { label: isOuterInner ? 'Left Arm (DT)' : 'Left Arm', value: fmt(calcs.dLA) },
+        { label: isOuterInner ? 'Right Arm (DT)' : 'Right Arm', value: fmt(calcs.dRA) },
+        { label: isOuterInner ? 'Notch W (DWL)' : 'Notch W', value: payload.autoPocket ? '—' : fmt(calcs.notchHorizontalWidth) }
     ];
 
     panel.innerHTML = chips.map(chip => `

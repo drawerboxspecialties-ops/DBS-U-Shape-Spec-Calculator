@@ -114,7 +114,7 @@ function updatePreview() {
     const payload = getFormPayload();
     const calcs = FORMULA_CONFIG.calculateValues(getCurrentMode(), payload);
     generateSVG(payload, 'preview-svg', true, getCurrentMode(), false);
-    updateSpecReadout(payload, calcs);
+    updateSpecReadout(payload, calcs, getCurrentMode());
 }
 
 function addToQueue() {
