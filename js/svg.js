@@ -13,9 +13,9 @@ export function generateSVG(data, svgId, showWood, itemMode, isPrint) {
     const calcs = FORMULA_CONFIG.calculateValues(itemMode, data);
     const { sideLen, backWidth, udDisplay, dLA, dRA, notchHorizontalWidth } = calcs;
 
-    const hMargin = isPrint ? 60 : 85;
-    const vTopMargin = isPrint ? 80 : 105;
-    const vBottomMargin = isPrint ? 80 : 85;
+    const hMargin = isPrint ? (itemMode === 'outerDtInnerDwl' ? 72 : 60) : 85;
+    const vTopMargin = isPrint ? (itemMode === 'outerDtInnerDwl' ? 92 : 80) : 105;
+    const vBottomMargin = isPrint ? (itemMode === 'outerDtInnerDwl' ? 92 : 80) : 85;
 
     const scale = Math.min((500 - hMargin * 2) / w, (400 - (vTopMargin + vBottomMargin) - 10) / d);
     const dW = w * scale;
@@ -38,14 +38,28 @@ export function generateSVG(data, svgId, showWood, itemMode, isPrint) {
     const safeLabel = escapeHTML(data.label);
     const safeSvgId = escapeHTML(svgId);
 
-    const joineryTags = itemMode === 'outerDtInnerDwl' ? `
-        <text x="${x0 + sLA / 2}" y="${y0 - 52}" text-anchor="middle" font-size="14" font-weight="900" fill="#0f766e">DT</text>
-        <text x="${x0 + dW - sRA / 2}" y="${y0 - 52}" text-anchor="middle" font-size="14" font-weight="900" fill="#0f766e">DT</text>
-        <text x="${x0 + dW / 2}" y="${y0 + dD + 78}" text-anchor="middle" font-size="14" font-weight="900" fill="#0f766e">DT</text>
-        <text x="${x0 - 88}" y="${y0 + dD / 2}" text-anchor="middle" font-size="14" font-weight="900" fill="#0f766e" transform="rotate(-90, ${x0 - 88}, ${y0 + dD / 2})">DT</text>
-        <text x="${x0 + sLA + 22}" y="${y0 + (sUD / 2) + 22}" text-anchor="start" font-size="14" font-weight="900" fill="#b45309">DWL</text>
-        ${!hideNotchLine ? `<text x="${x0 + sLA + ((dW - sLA - sRA) / 2)}" y="${y0 + sUD + 58}" text-anchor="middle" font-size="14" font-weight="900" fill="#b45309">DWL</text>` : ''}
-    ` : '';
+    // Keep DT/DWL tags inside the 500×400 viewBox (print margins are tighter than preview).
+    let joineryTags = '';
+    if (itemMode === 'outerDtInnerDwl') {
+        const dtFill = '#0f766e';
+        const dwlFill = '#b45309';
+        const tagSize = isPrint ? 13 : 14;
+        const armTagY = Math.max(14, y0 - (isPrint ? 48 : 52));
+        const sideTagX = Math.max(14, x0 - (isPrint ? 78 : 88));
+        const backTagY = Math.min(392, y0 + dD + (isPrint ? 70 : 78));
+        const pocketTagY = y0 + (sUD / 2) + (isPrint ? 18 : 22);
+        const notchTagY = Math.min(392, y0 + sUD + (isPrint ? 52 : 58));
+        const notchTagX = x0 + sLA + ((dW - sLA - sRA) / 2);
+
+        joineryTags = `
+        <text x="${x0 + sLA / 2}" y="${armTagY}" text-anchor="middle" font-size="${tagSize}" font-weight="900" fill="${dtFill}">DT</text>
+        <text x="${x0 + dW - sRA / 2}" y="${armTagY}" text-anchor="middle" font-size="${tagSize}" font-weight="900" fill="${dtFill}">DT</text>
+        <text x="${x0 + dW / 2}" y="${backTagY}" text-anchor="middle" font-size="${tagSize}" font-weight="900" fill="${dtFill}">DT</text>
+        <text x="${sideTagX}" y="${y0 + dD / 2}" text-anchor="middle" font-size="${tagSize}" font-weight="900" fill="${dtFill}" transform="rotate(-90, ${sideTagX}, ${y0 + dD / 2})">DT</text>
+        <text x="${x0 + sLA + 22}" y="${pocketTagY}" text-anchor="start" font-size="${tagSize}" font-weight="900" fill="${dwlFill}">DWL</text>
+        ${!hideNotchLine ? `<text x="${notchTagX}" y="${notchTagY}" text-anchor="middle" font-size="${tagSize}" font-weight="900" fill="${dwlFill}">DWL</text>` : ''}
+    `;
+    }
 
     svg.innerHTML = `
         <defs>

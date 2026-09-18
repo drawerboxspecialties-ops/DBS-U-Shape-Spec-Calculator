@@ -1,6 +1,6 @@
 import { FORMULA_CONFIG } from './formulas.js';
 import { getCurrentMode, setCurrentMode } from './js/state.js';
-import { parseFraction } from './js/utils.js';
+import { parseFraction, normalizeFractionField } from './js/utils.js';
 import { getFormPayload, getValidationIssue, getRequiredFieldIds } from './js/validation.js';
 import { generateSVG } from './js/svg.js';
 import {
@@ -14,6 +14,22 @@ import {
     loadQueueFromStorage, renderQueue, addItem,
     removeItem, clearQueue, exportQueueJson, importQueueJson, duplicateItem
 } from './js/queue.js';
+
+/** Dimension fields that accept mixed fractions like "19 1/2" — all modes. */
+const FRACTION_FIELD_IDS = ['width', 'depth', 'height', 'uDepth', 'lArm', 'rArm', 'lipLeft', 'lipRight'];
+
+function normalizeAllFractionInputs() {
+    let changed = false;
+    FRACTION_FIELD_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (normalizeFractionField(el)) changed = true;
+    });
+    return changed;
+}
+
+function onFractionFieldBlur(e) {
+    if (normalizeFractionField(e.target)) validateInput();
+}
 
 function validateInput() {
     const mode = getCurrentMode();
@@ -118,6 +134,8 @@ function updatePreview() {
 }
 
 function addToQueue() {
+    normalizeAllFractionInputs();
+
     const sel = document.getElementById('thick');
     const isAutoChecked = document.getElementById('autoPocketToggle').checked;
 
@@ -176,6 +194,11 @@ window.onload = function() {
     renderQueue();
     validateInput();
     initKeyboardShortcuts();
+
+    FRACTION_FIELD_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('blur', onFractionFieldBlur);
+    });
 
     document.getElementById('import-file').addEventListener('change', (e) => {
         const file = e.target.files?.[0];

@@ -151,7 +151,7 @@
             .print-area { display: block !important; width: 100%; }
             #print-items { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
             .item-container { border: 3px solid #000; padding: 12px; height: 46vh; page-break-inside: avoid; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow: hidden; background: #fff; }
-            svg { width: 100% !important; height: 100% !important; max-height: none !important; margin: 0 !important; }
+            svg { width: 100% !important; height: 100% !important; max-height: none !important; margin: 0 !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
             .print-header-single {
                 width: 100%; border-bottom: 2px solid #000; padding: 6px 0; margin-bottom: 8px;
                 font-size: 13px; font-weight: 900; display: flex; align-items: center; justify-content: space-between;
